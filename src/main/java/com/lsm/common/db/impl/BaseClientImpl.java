@@ -113,5 +113,9 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         return null;
     }
 
+    public HashMap get(T t, String condition) {
+        return null;
+    }
+
 
 }

@@ -124,12 +124,6 @@ public interface BaseClient<T> {
      */
     HashMap list(T t, String condition);
 
-    /**
-     * 查询单个,可根据条件
-     *
-     * @param t         entity
-     * @param condition 条件
-     * @return
-     */
-    HashMap get(T t, String condition);
+
+    HashMap get(T t, List<Where> wheres);
 }

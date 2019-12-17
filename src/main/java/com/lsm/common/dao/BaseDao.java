@@ -11,4 +11,6 @@ public interface BaseDao {
     Integer update(Object object);
 
     HashMap query(Integer id, Class c);
+
+    HashMap get(Object object);
 }

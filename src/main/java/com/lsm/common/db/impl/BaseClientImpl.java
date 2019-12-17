@@ -5,6 +5,7 @@ import com.lsm.common.annotation.Id;
 import com.lsm.common.annotation.Table;
 import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.BaseClient;
+import com.lsm.common.db.Where;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -113,8 +114,11 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         return null;
     }
 
-    public HashMap get(T t, String condition) {
-        return null;
+    public HashMap get(T t, List<Where> wheres) {
+        Map<String, Object> params = buildParams(t);
+        params.put("WHERES", wheres);
+        logger.info("Function Save.Params:" + params);
+        return baseDao.get(params);
     }
 
 

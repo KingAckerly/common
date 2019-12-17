@@ -6,15 +6,17 @@ import com.lsm.common.annotation.Table;
 import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.BaseClient;
 import com.lsm.common.db.Where;
+import com.lsm.common.entity.app.AppEntity;
+import com.lsm.common.util.MapUtil;
+import com.lsm.common.util.UnderlineHumpUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,8 +119,14 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     public HashMap get(T t, List<Where> wheres) {
         Map<String, Object> params = buildParams(t);
         params.put("WHERES", wheres);
-        logger.info("Function Save.Params:" + params);
-        return baseDao.get(params);
+        logger.info("Function Get.Params:" + params);
+        HashMap<String, Object> hashMap = baseDao.get(params);
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        for (Map.Entry<String, Object> item : hashMap.entrySet()) {
+            map.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
+        }
+        AppEntity appEntity = MapUtil.mapToEntity(map, AppEntity.class);
+        return null;
     }
 
 

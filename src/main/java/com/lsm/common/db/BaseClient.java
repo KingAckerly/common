@@ -1,6 +1,8 @@
 package com.lsm.common.db;
 
 
+import com.lsm.common.entity.BaseEntity;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -125,5 +127,5 @@ public interface BaseClient<T> {
     HashMap list(T t, String condition);
 
 
-    HashMap get(T t, List<Where> wheres);
+    BaseEntity get(T t, List<Where> wheres);
 }

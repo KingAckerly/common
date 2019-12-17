@@ -4,12 +4,13 @@ package com.lsm.common.entity.app;
 import com.lsm.common.annotation.Column;
 import com.lsm.common.annotation.Id;
 import com.lsm.common.annotation.Table;
+import com.lsm.common.entity.BaseEntity;
 
 /**
  * 自定义注解
  */
 @Table(value = "app")
-public class AppEntity {
+public class AppEntity extends BaseEntity {
     private Integer id;
     private String appName;
     private String appInfo;

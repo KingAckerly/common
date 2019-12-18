@@ -34,99 +34,11 @@ import java.util.List;
  */
 public interface BaseClient<T> {
 
-    /**
-     * 单个插入不返回主键
-     *
-     * @param t entity
-     * @return 受影响行数
-     */
     Integer save(T t);
 
-    /**
-     * 单个插入并返回主键
-     *
-     * @param t entity
-     * @return 主键
-     */
-    String saveRetPK(T t);
-
-    /**
-     * 批量插入不返回主键
-     *
-     * @param list entity
-     * @return 受影响行数
-     */
-    Integer saveBatch(List<T> list);
-
-    /**
-     * 批量插入并返回主键
-     *
-     * @param list entity
-     * @return 主键
-     */
-    List<String> saveBatchRetPK(List<T> list);
-
-    /**
-     * 根据主键单个删除
-     *
-     * @param t entity
-     * @return 受影响行数
-     */
-    Integer removeByPK(T t);
-
-    /**
-     * 根据主键批量删除
-     *
-     * @param list entity
-     * @return 受影响行数
-     */
-    Integer removeBatchByPK(List<T> list);
-
-    /**
-     * 根据条件删除
-     *
-     * @param t         entity
-     * @param condition 条件
-     * @return
-     */
-    Integer removeByCondition(T t, String condition);
-
-    /**
-     * 根据主键单个修改,可根据条件
-     *
-     * @param t         entity
-     * @param condition 条件
-     * @return 受影响行数
-     */
-    Integer update(T t, String condition);
-
-    /**
-     * 批量修改
-     *
-     * @param t entity
-     * @return 受影响行数
-     */
-    Integer updateBatch(T t);
-
-    /**
-     * 查总条数,可根据条件
-     *
-     * @param t         entity
-     * @param condition 条件
-     * @return
-     */
-    Integer count(T t, String condition);
-
-    /**
-     * 查询,可根据条件
-     *
-     * @param t         entity
-     * @param condition 条件
-     * @return
-     */
-    HashMap list(T t, String condition);
-
     Integer remove(Where where);
+
+    Integer update(T t, Where where);
 
     BaseEntity get(Where where);
 }

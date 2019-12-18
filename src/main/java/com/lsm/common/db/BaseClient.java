@@ -3,9 +3,6 @@ package com.lsm.common.db;
 
 import com.lsm.common.entity.BaseEntity;
 
-import java.util.HashMap;
-import java.util.List;
-
 /**
  * 常见通用操作
  * 1.新增

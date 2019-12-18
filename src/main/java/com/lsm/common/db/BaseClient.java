@@ -126,6 +126,7 @@ public interface BaseClient<T> {
      */
     HashMap list(T t, String condition);
 
+    Integer remove(Where where);
 
     BaseEntity get(Where where);
 }

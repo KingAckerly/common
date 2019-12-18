@@ -7,7 +7,6 @@ import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.BaseClient;
 import com.lsm.common.db.Where;
 import com.lsm.common.entity.BaseEntity;
-import com.lsm.common.entity.app.AppEntity;
 import com.lsm.common.util.MapUtil;
 import com.lsm.common.util.UnderlineHumpUtil;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,10 @@ public class BaseClientImpl<T> implements BaseClient<T> {
 
     @Resource
     private BaseDao baseDao;
+
+    private Map<String, Object> params;
+
+    private HashMap<String, Object> baseMap;
 
     private Map<String, Object> buildParams(T t) {
         //获取表名
@@ -70,7 +73,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
 
 
     public Integer save(T t) {
-        Map<String, Object> params = buildParams(t);
+        params = buildParams(t);
         logger.info("Function Save.Params:" + params);
         return baseDao.save(params);
     }
@@ -115,21 +118,34 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         return null;
     }
 
-    public BaseEntity get(Where where) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        String tableName = getTableName(where.getClazz());
-        params.put("TABLE_NAME", tableName);
-        params.put("WHERES", where.getWheres());
-        logger.info("Function Get.Params:" + params);
-        HashMap<String, Object> hashMap = baseDao.get(params);
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        for (Map.Entry<String, Object> item : hashMap.entrySet()) {
-            map.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
-        }
-        return (BaseEntity) MapUtil.mapToEntity(map, where.getClazz());
+    public Integer remove(Where where) {
+        params = buildParams(where);
+        logger.info("Function Remove.Params:" + params);
+        return baseDao.remove(params);
     }
 
-    public static String getTableName(Class<?> clazz) {
+    public BaseEntity get(Where where) {
+        params = buildParams(where);
+        logger.info("Function Get.Params:" + params);
+        return buildBaseEntity(baseDao.get(params), where);
+    }
+
+    public BaseEntity buildBaseEntity(HashMap<String, Object> hashMap, Where where) {
+        baseMap = new HashMap<String, Object>();
+        for (Map.Entry<String, Object> item : hashMap.entrySet()) {
+            baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
+        }
+        return (BaseEntity) MapUtil.mapToEntity(baseMap, where.getClazz());
+    }
+
+    public Map buildParams(Where where) {
+        params = new HashMap<String, Object>();
+        params.put("TABLE_NAME", getTableName(where.getClazz()));
+        params.put("WHERES", where.getWheres());
+        return params;
+    }
+
+    public String getTableName(Class<?> clazz) {
         // 判断是否有Table注解
         if (clazz.isAnnotationPresent(Table.class)) {
             // 获取注解对象

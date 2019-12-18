@@ -26,4 +26,18 @@
             </foreach>
         </if>
     </select>
+    <select id="remove" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        DELETE FROM ${TABLE_NAME}
+        <if test="WHERES != null and WHERES.size()>0">
+            WHERE 1 = 1
+            <foreach collection="WHERES" item="item">
+                <if test="item.relation=='and'">
+                    AND ${item.field} ${item.expression} #{item.value}
+                </if>
+                <if test="item.relation=='or'">
+                    OR ${item.field} ${item.expression} #{item.value}
+                </if>
+            </foreach>
+        </if>
+    </select>
 </mapper>

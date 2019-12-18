@@ -127,5 +127,5 @@ public interface BaseClient<T> {
     HashMap list(T t, String condition);
 
 
-    BaseEntity get(T t, List<Where> wheres);
+    BaseEntity get(Where where);
 }

@@ -115,19 +115,28 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         return null;
     }
 
-    public BaseEntity get(T t, List<Where> wheres) {
-        Map<String, Object> params = buildParams(t);
-        params.put("WHERES", wheres);
+    public BaseEntity get(Where where) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        String tableName = getTableName(where.getClazz());
+        params.put("TABLE_NAME", tableName);
+        params.put("WHERES", where.getWheres());
         logger.info("Function Get.Params:" + params);
         HashMap<String, Object> hashMap = baseDao.get(params);
         HashMap<String, Object> map = new HashMap<String, Object>();
         for (Map.Entry<String, Object> item : hashMap.entrySet()) {
             map.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
         }
-        AppEntity appEntity = MapUtil.mapToEntity(map, AppEntity.class);
-        BaseEntity baseEntity = appEntity;
-        return baseEntity;
+        return (BaseEntity) MapUtil.mapToEntity(map, where.getClazz());
     }
 
+    public static String getTableName(Class<?> clazz) {
+        // 判断是否有Table注解
+        if (clazz.isAnnotationPresent(Table.class)) {
+            // 获取注解对象
+            Table table = clazz.getAnnotation(Table.class);
+            return table.value();
+        }
+        return null;
+    }
 
 }

@@ -18,9 +18,9 @@
     </insert>
     <delete id="remove" parameterType="com.lsm.common.db.DBCommonPO">
         DELETE FROM ${tableName}
-        <if test="wheres.wheres != null and wheres.wheres.size()>0">
+        <if test="wheres != null and wheres.size()>0">
             WHERE 1 = 1
-            <foreach collection="wheres.wheres" item="item">
+            <foreach collection="wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}
                 </if>
@@ -36,9 +36,9 @@
         <foreach collection="updateColumns" item="item" index="index" separator=",">
             ${item.column} = #{item.value}
         </foreach>
-        <if test="wheres.wheres != null and wheres.wheres.size()>0">
+        <if test="wheres != null and wheres.size()>0">
             WHERE is_delete = 0
-            <foreach collection="wheres.wheres" item="item">
+            <foreach collection="wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}
                 </if>
@@ -50,9 +50,9 @@
     </update>
     <select id="get" parameterType="com.lsm.common.db.DBCommonPO" resultType="java.util.HashMap">
         SELECT * FROM ${tableName}
-        <if test="wheres.wheres != null and wheres.wheres.size()>0">
+        <if test="wheres != null and wheres.size()>0">
             WHERE 1 = 1
-            <foreach collection="wheres.wheres" item="item">
+            <foreach collection="wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}
                 </if>

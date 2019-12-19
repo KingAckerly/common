@@ -2,14 +2,14 @@ package com.lsm.common.db;
 
 
 public class PK {
-    private Integer keyId;
+    private String keyId;
     private Object keyValue;
 
-    public Integer getKeyId() {
+    public String getKeyId() {
         return keyId;
     }
 
-    public PK setKeyId(Integer keyId) {
+    public PK setKeyId(String keyId) {
         this.keyId = keyId;
         return this;
     }

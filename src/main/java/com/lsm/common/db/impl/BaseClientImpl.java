@@ -4,8 +4,7 @@ import com.lsm.common.annotation.Column;
 import com.lsm.common.annotation.Id;
 import com.lsm.common.annotation.Table;
 import com.lsm.common.dao.BaseDao;
-import com.lsm.common.db.BaseClient;
-import com.lsm.common.db.Where;
+import com.lsm.common.db.*;
 import com.lsm.common.entity.BaseEntity;
 import com.lsm.common.util.MapUtil;
 import com.lsm.common.util.UnderlineHumpUtil;
@@ -27,93 +26,123 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     @Resource
     private BaseDao baseDao;
 
-    private Map<String, Object> params;
+    //private Map<String, Object> params;
 
     private HashMap<String, Object> baseMap;
 
+    private DBCommonPO dbCommonPO;
+
 
     public Integer save(T t) {
-        params = buildParams(t, null, "insert");
+        buildParams(t, null, "insert");
+        logger.info("Function Save.Params:" + dbCommonPO);
+        return baseDao.save(dbCommonPO);
+        /*params = buildParams(t, null, "insert");
         logger.info("Function Save.Params:" + params);
-        return baseDao.save(params);
+        return baseDao.save(params);*/
     }
 
     public Integer remove(Where where) {
-        params = buildParams(null, where, null);
+        buildParams(null, where, null);
+        logger.info("Function Remove.Params:" + dbCommonPO);
+        return baseDao.remove(dbCommonPO);
+        /*params = buildParams(null, where, null);
         logger.info("Function Remove.Params:" + params);
-        return baseDao.remove(params);
+        return baseDao.remove(params);*/
     }
 
     public Integer update(T t, Where where) {
-        params = buildParams(t, where, "update");
+        buildParams(t, where, "update");
+        logger.info("Function Update.Params:" + dbCommonPO);
+        return baseDao.update(dbCommonPO);
+        /*params = buildParams(t, where, "update");
         logger.info("Function Update.Params:" + params);
-        return baseDao.update(params);
+        return baseDao.update(params);*/
     }
 
     public BaseEntity get(Where where) {
-        params = buildParams(null, where, null);
+        buildParams(null, where, null);
+        logger.info("Function Get.Params:" + dbCommonPO);
+        return buildBaseEntity(baseDao.get(dbCommonPO), where);
+        /*params = buildParams(null, where, null);
         logger.info("Function Get.Params:" + params);
-        return buildBaseEntity(baseDao.get(params), where);
+        return buildBaseEntity(baseDao.get(params), where);*/
     }
 
-    private Map<String, Object> buildParams(T t, Where where, String type) {
-        params = new HashMap<>();
+    //private Map<String, Object> buildParams(T t, Where where, String type) {
+    private void buildParams(T t, Where where, String type) {
+        //params = new HashMap<>();
+        dbCommonPO = new DBCommonPO();
         if (null != t) {
             //获取表名
             if (null == t.getClass().getAnnotation(Table.class)) {
                 throw new RuntimeException("Error Input Object! Error @Table Annotation.");
             }
-            params.put("TABLE_NAME", t.getClass().getAnnotation(Table.class).value());
+            //params.put("TABLE_NAME", t.getClass().getAnnotation(Table.class).value());
+            dbCommonPO.setTableName(t.getClass().getAnnotation(Table.class).value());
             Method[] m = t.getClass().getMethods();
             if (null == m || m.length <= 0) {
                 throw new RuntimeException("Error Input Object! No Method.");
             }
             switch (type) {
                 case "insert":
-                    List k = new ArrayList();//存放列名
-                    List v = new ArrayList();//存放列值
+                    //List k = new ArrayList();//存放列名
+                    //List v = new ArrayList();//存放列值
+                    List<String> saveColumns = new ArrayList<>();
+                    List<Object> saveValues = new ArrayList<>();
                     for (Method i : m) {
                         //获取列名和值
                         if (null != i.getAnnotation(Column.class) && null != getInvokeValue(t, i)) {
-                            k.add(i.getAnnotation(Column.class).value());
-                            v.add(getInvokeValue(t, i));
+                            saveColumns.add(i.getAnnotation(Column.class).value());
+                            saveValues.add(getInvokeValue(t, i));
                             continue;
                         }
                         if (null != i.getAnnotation(Id.class)) {
-                            params.put("KEY_ID", i.getAnnotation(Id.class).value());
-                            params.put("KEY_VALUE", getInvokeValue(t, i));
+                            //params.put("KEY_ID", i.getAnnotation(Id.class).value());
+                            //params.put("KEY_VALUE", getInvokeValue(t, i));
+                            dbCommonPO.setPk(new PK().setKeyId(i.getAnnotation(Id.class).value()).setKeyValue(getInvokeValue(t, i)));
                         }
                     }
-                    if (k.size() != v.size()) {
+                    if (saveColumns.size() != saveValues.size()) {
                         throw new RuntimeException("Error Input Object! Internal Error.");
                     }
-                    params.put("COLUMNS", k);
-                    params.put("VALUES", v);
+                    //params.put("COLUMNS", k);
+                    //params.put("VALUES", v);
+                    dbCommonPO.setSaveColumns(new SaveColumns().setColums(saveColumns).setValues(saveValues));
                     break;
                 case "update":
-                    List data = new ArrayList();
+                    //List data = new ArrayList();
+                    List<UpdateColumns> updateColumnsList = new ArrayList<>();
+                    UpdateColumns updateColumns = new UpdateColumns();
                     for (Method i : m) {
                         Map<String, Object> map = new HashMap<String, Object>();
                         if (null != i.getAnnotation(Column.class) && null != getInvokeValue(t, i)) {
-                            map.put("COLUMN", i.getAnnotation(Column.class).value());
-                            map.put("VALUE", getInvokeValue(t, i));
-                            data.add(map);
+                            //map.put("COLUMN", i.getAnnotation(Column.class).value());
+                            //map.put("VALUE", getInvokeValue(t, i));
+                            //data.add(map);
+                            updateColumns.setColumn(i.getAnnotation(Column.class).value());
+                            updateColumns.setValue(getInvokeValue(t, i));
+                            updateColumnsList.add(updateColumns);
                             continue;
                         }
                         if (null != i.getAnnotation(Id.class)) {
-                            params.put("KEY_ID", i.getAnnotation(Id.class).value());
-                            params.put("KEY_VALUE", getInvokeValue(t, i));
+                            //params.put("KEY_ID", i.getAnnotation(Id.class).value());
+                            //params.put("KEY_VALUE", getInvokeValue(t, i));
+                            dbCommonPO.setPk(new PK().setKeyId(i.getAnnotation(Id.class).value()).setKeyValue(getInvokeValue(t, i)));
                         }
                     }
-                    params.put("DATA", data);
+                    //params.put("DATA", data);
+                    dbCommonPO.setUpdateColumns(updateColumnsList);
                     break;
             }
         }
         if (null != where) {
-            params.put("TABLE_NAME", getTableName(where.getClazz()));
-            params.put("WHERES", where.getWheres());
+            //params.put("TABLE_NAME", getTableName(where.getClazz()));
+            //params.put("WHERES", where.getWheres());
+            dbCommonPO.setTableName(getTableName(where.getClazz()));
+            dbCommonPO.setWheres(where.getWheres());
         }
-        return params;
+        //return params;
     }
 
     private Object getInvokeValue(Object t, Method i) {

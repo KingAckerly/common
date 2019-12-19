@@ -1,14 +1,16 @@
 package com.lsm.common.dao;
 
 
+import com.lsm.common.db.DBCommonPO;
+
 import java.util.HashMap;
 
 public interface BaseDao {
-    Integer save(Object object);
+    Integer save(DBCommonPO dbCommonPO);
 
-    Integer remove(Object object);
+    Integer remove(DBCommonPO dbCommonPO);
 
-    Integer update(Object object);
+    Integer update(DBCommonPO dbCommonPO);
 
-    HashMap get(Object object);
+    HashMap get(DBCommonPO dbCommonPO);
 }

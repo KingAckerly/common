@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lsm.common.dao.BaseDao">
-    <insert id="save" parameterType="java.util.HashMap">
-        INSERT INTO ${TABLE_NAME} (
+    <insert id="save" parameterType="com.lsm.common.db.DBCommonPO">
+        INSERT INTO ${tableName} (
         creater_time,
         is_delete,
-        <foreach collection="COLUMNS" item="item" index="index" separator=",">
+        <foreach collection="saveColumns.colums" item="item" index="index" separator=",">
             ${item}
         </foreach>
         ) VALUES (
         NOW(),
         0,
-        <foreach collection="VALUES" item="item" index="index" separator=",">
+        <foreach collection="saveColumns.values" item="item" index="index" separator=",">
             #{item}
         </foreach>
         )
     </insert>
-    <delete id="remove" parameterType="java.util.HashMap">
-        DELETE FROM ${TABLE_NAME}
-        <if test="WHERES != null and WHERES.size()>0">
+    <delete id="remove" parameterType="com.lsm.common.db.DBCommonPO">
+        DELETE FROM ${tableName}
+        <if test="wheres.wheres != null and wheres.wheres.size()>0">
             WHERE 1 = 1
-            <foreach collection="WHERES" item="item">
+            <foreach collection="wheres.wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}
                 </if>
@@ -30,15 +30,15 @@
             </foreach>
         </if>
     </delete>
-    <update id="update" parameterType="java.util.HashMap">
-        UPDATE ${TABLE_NAME} SET
+    <update id="update" parameterType="com.lsm.common.db.DBCommonPO">
+        UPDATE ${tableName} SET
         updater_time = NOW(),
-        <foreach collection="DATA" item="item" index="index" separator=",">
-            ${item.COLUMN} = #{item.VALUE}
+        <foreach collection="updateColumns" item="item" index="index" separator=",">
+            ${item.column} = #{item.value}
         </foreach>
-        <if test="WHERES != null and WHERES.size()>0">
+        <if test="wheres.wheres != null and wheres.wheres.size()>0">
             WHERE is_delete = 0
-            <foreach collection="WHERES" item="item">
+            <foreach collection="wheres.wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}
                 </if>
@@ -48,11 +48,11 @@
             </foreach>
         </if>
     </update>
-    <select id="get" parameterType="java.util.HashMap" resultType="java.util.HashMap">
-        SELECT * FROM ${TABLE_NAME}
-        <if test="WHERES != null and WHERES.size()>0">
+    <select id="get" parameterType="com.lsm.common.db.DBCommonPO" resultType="java.util.HashMap">
+        SELECT * FROM ${tableName}
+        <if test="wheres.wheres != null and wheres.wheres.size()>0">
             WHERE 1 = 1
-            <foreach collection="WHERES" item="item">
+            <foreach collection="wheres.wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}
                 </if>

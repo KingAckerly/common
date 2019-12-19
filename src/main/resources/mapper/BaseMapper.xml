@@ -3,10 +3,14 @@
 <mapper namespace="com.lsm.common.dao.BaseDao">
     <insert id="save" parameterType="java.util.HashMap">
         INSERT INTO ${TABLE_NAME} (
+        creater_time,
+        is_delete,
         <foreach collection="COLUMNS" item="item" index="index" separator=",">
             ${item}
         </foreach>
         ) VALUES (
+        NOW(),
+        0,
         <foreach collection="VALUES" item="item" index="index" separator=",">
             #{item}
         </foreach>
@@ -28,11 +32,12 @@
     </delete>
     <update id="update" parameterType="java.util.HashMap">
         UPDATE ${TABLE_NAME} SET
+        updater_time = NOW(),
         <foreach collection="DATA" item="item" index="index" separator=",">
             ${item.COLUMN} = #{item.VALUE}
         </foreach>
         <if test="WHERES != null and WHERES.size()>0">
-            WHERE 1 = 1
+            WHERE is_delete = 0
             <foreach collection="WHERES" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}

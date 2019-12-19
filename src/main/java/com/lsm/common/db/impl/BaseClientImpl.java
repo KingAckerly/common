@@ -74,7 +74,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     List v = new ArrayList();//存放列值
                     for (Method i : m) {
                         //获取列名和值
-                        if (null != i.getAnnotation(Column.class)) {
+                        if (null != i.getAnnotation(Column.class) && null != getInvokeValue(t, i)) {
                             k.add(i.getAnnotation(Column.class).value());
                             v.add(getInvokeValue(t, i));
                             continue;

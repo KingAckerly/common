@@ -11,20 +11,10 @@ import com.lsm.common.entity.BaseEntity;
  */
 @Table(value = "app")
 public class AppEntity extends BaseEntity {
-    private Integer id;
+
     private String appName;
     private String appInfo;
     private String appKey;
-
-    @Id(value = "ID")
-    public Integer getId() {
-        return id;
-    }
-
-    public AppEntity setId(Integer id) {
-        this.id = id;
-        return this;
-    }
 
     @Column(value = "APP_NAME")
     public String getAppName() {
@@ -59,10 +49,9 @@ public class AppEntity extends BaseEntity {
     @Override
     public String toString() {
         return "AppEntity{" +
-                "id=" + id +
-                ", appName='" + appName + '\'' +
+                "appName='" + appName + '\'' +
                 ", appInfo='" + appInfo + '\'' +
                 ", appKey='" + appKey + '\'' +
-                '}';
+                "} " + super.toString();
     }
 }

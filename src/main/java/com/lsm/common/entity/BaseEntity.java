@@ -9,16 +9,21 @@ import java.util.Date;
 
 public class BaseEntity {
 
+    @Id(value = "ID")
     private Integer id;
+    @Column(value = "CREATER_ID")
     private Integer createrId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Column(value = "CREATER_TIME")
     private Date createrTime;
+    @Column(value = "UPDATER_ID")
     private Integer updaterId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Column(value = "UPDATER_TIME")
     private Date updaterTime;
+    @Column(value = "IS_DELETE")
     private Integer isDelete;
 
-    @Id(value = "ID")
     public Integer getId() {
         return id;
     }
@@ -28,7 +33,6 @@ public class BaseEntity {
         return this;
     }
 
-    @Column(value = "CREATER_ID")
     public Integer getCreaterId() {
         return createrId;
     }
@@ -38,7 +42,6 @@ public class BaseEntity {
         return this;
     }
 
-    @Column(value = "CREATER_TIME")
     public Date getCreaterTime() {
         return createrTime;
     }
@@ -48,7 +51,6 @@ public class BaseEntity {
         return this;
     }
 
-    @Column(value = "UPDATER_ID")
     public Integer getUpdaterId() {
         return updaterId;
     }
@@ -58,7 +60,6 @@ public class BaseEntity {
         return this;
     }
 
-    @Column(value = "UPDATER_TIME")
     public Date getUpdaterTime() {
         return updaterTime;
     }
@@ -68,7 +69,6 @@ public class BaseEntity {
         return this;
     }
 
-    @Column(value = "IS_DELETE")
     public Integer getIsDelete() {
         return isDelete;
     }

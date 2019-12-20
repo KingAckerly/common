@@ -1,7 +1,6 @@
 package com.lsm.common.entity.app;
 
 
-
 import com.lsm.common.annotation.Column;
 import com.lsm.common.annotation.Table;
 import com.lsm.common.entity.BaseEntity;
@@ -12,11 +11,13 @@ import com.lsm.common.entity.BaseEntity;
 @Table(value = "app")
 public class AppEntity extends BaseEntity {
 
+    @Column(value = "APP_NAME")
     private String appName;
+    @Column(value = "APP_INFO")
     private String appInfo;
+    @Column(value = "APP_KEY")
     private String appKey;
 
-    @Column(value = "APP_NAME")
     public String getAppName() {
         return appName;
     }
@@ -26,7 +27,6 @@ public class AppEntity extends BaseEntity {
         return this;
     }
 
-    @Column(value = "APP_INFO")
     public String getAppInfo() {
         return appInfo;
     }
@@ -36,7 +36,6 @@ public class AppEntity extends BaseEntity {
         return this;
     }
 
-    @Column(value = "APP_KEY")
     public String getAppKey() {
         return appKey;
     }

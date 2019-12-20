@@ -3,7 +3,7 @@ package com.lsm.common.annotation;
 import java.lang.annotation.*;
 
 
-@Target({ElementType.METHOD})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Id {

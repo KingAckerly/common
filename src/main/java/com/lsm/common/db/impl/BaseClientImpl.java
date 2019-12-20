@@ -6,13 +6,13 @@ import com.lsm.common.annotation.Table;
 import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.*;
 import com.lsm.common.entity.BaseEntity;
+import com.lsm.common.util.FieldsUtil;
 import com.lsm.common.util.MapUtil;
 import com.lsm.common.util.UnderlineHumpUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.*;
 
 import org.slf4j.Logger;
@@ -63,24 +63,24 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                 throw new RuntimeException("Error Input Object! Error @Table Annotation.");
             }
             dbCommonPO.setTableName(t.getClass().getAnnotation(Table.class).value());
-            Method[] m = t.getClass().getMethods();
-            if (null == m || m.length <= 0) {
-                throw new RuntimeException("Error Input Object! No Method.");
-            }
+            List<Field> fields = FieldsUtil.getFields(t.getClass());
             switch (type) {
                 case "insert":
                     List<String> saveColumns = new ArrayList<>();
                     List<Object> saveValues = new ArrayList<>();
-                    for (Method i : m) {
-                        //获取列名和值
-                        if (null != i.getAnnotation(Column.class) && null != getInvokeValue(t, i)) {
-                            saveColumns.add(i.getAnnotation(Column.class).value());
-                            saveValues.add(getInvokeValue(t, i));
-                            continue;
+                    try {
+                        for (Field field : fields) {
+                            field.setAccessible(true);
+                            if (null != field.getAnnotation(Column.class) && null != field.get(t)) {
+                                saveColumns.add(field.getAnnotation(Column.class).value());
+                                saveValues.add(field.get(t));
+                            }
+                            if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
+                                dbCommonPO.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
+                            }
                         }
-                        if (null != i.getAnnotation(Id.class)) {
-                            dbCommonPO.setPk(new PK().setKeyId(i.getAnnotation(Id.class).value()).setKeyValue(getInvokeValue(t, i)));
-                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                     }
                     if (saveColumns.size() != saveValues.size()) {
                         throw new RuntimeException("Error Input Object! Internal Error.");
@@ -89,14 +89,20 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     break;
                 case "update":
                     List<UpdateColumns> updateColumnsList = new ArrayList<>();
-                    for (Method i : m) {
-                        if (null != i.getAnnotation(Column.class) && null != getInvokeValue(t, i)) {
-                            updateColumnsList.add(new UpdateColumns().setColumn(i.getAnnotation(Column.class).value()).setValue(getInvokeValue(t, i)));
-                            continue;
+                    try {
+                        for (Field field : fields) {
+                            field.setAccessible(true);
+                            if (null != field.getAnnotation(Column.class) && null != field.get(t)) {
+                                updateColumnsList.add(new UpdateColumns().setColumn(field.getAnnotation(Column.class).value())
+                                        .setValue(field.get(t)));
+                                continue;
+                            }
+                            if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
+                                dbCommonPO.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
+                            }
                         }
-                        if (null != i.getAnnotation(Id.class)) {
-                            dbCommonPO.setPk(new PK().setKeyId(i.getAnnotation(Id.class).value()).setKeyValue(getInvokeValue(t, i)));
-                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                     }
                     dbCommonPO.setUpdateColumns(updateColumnsList);
                     break;
@@ -105,16 +111,6 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         if (null != where) {
             dbCommonPO.setTableName(getTableName(where.getClazz()));
             dbCommonPO.setWheres(where.getWheres());
-        }
-    }
-
-    private Object getInvokeValue(Object t, Method i) {
-        try {
-            return i.invoke(t, null);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Error Input Object! Error Invoke Get Method.", e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException("Error Input Object! Error Invoke Get Method.", e);
         }
     }
 

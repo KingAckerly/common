@@ -3,6 +3,8 @@ package com.lsm.common.db;
 
 import com.lsm.common.entity.BaseEntity;
 
+import java.util.List;
+
 /**
  * 常见通用操作
  * 1.新增
@@ -38,4 +40,6 @@ public interface BaseClient<T> {
     Integer update(T t, Where where);
 
     BaseEntity get(Where where);
+
+    BaseEntity get(List<String> selectColumns, Where where);
 }

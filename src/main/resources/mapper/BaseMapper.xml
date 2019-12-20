@@ -49,7 +49,16 @@
         </if>
     </update>
     <select id="get" parameterType="com.lsm.common.db.DBCommonPO" resultType="java.util.HashMap">
-        SELECT * FROM ${tableName}
+        <if test="selectColumns != null and selectColumns.size()>0">
+            SELECT
+            <foreach collection="selectColumns" item="item" index="index" separator=",">
+                ${item}
+            </foreach>
+            FROM ${tableName}
+        </if>
+        <if test="selectColumns == null">
+            SELECT * FROM ${tableName}
+        </if>
         <if test="wheres != null and wheres.size()>0">
             WHERE 1 = 1
             <foreach collection="wheres" item="item">

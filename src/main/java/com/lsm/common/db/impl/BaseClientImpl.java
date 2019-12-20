@@ -17,6 +17,7 @@ import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 @Service(value = "BaseClient")
 public class BaseClientImpl<T> implements BaseClient<T> {
@@ -32,30 +33,37 @@ public class BaseClientImpl<T> implements BaseClient<T> {
 
 
     public Integer save(T t) {
-        buildParams(t, null, "insert");
+        buildParams(t, null, null, "insert");
         logger.info("Function Save.Params:" + dbCommonPO);
         return baseDao.save(dbCommonPO);
     }
 
     public Integer remove(Where where) {
-        buildParams(null, where, null);
+        buildParams(null, null, where, null);
         logger.info("Function Remove.Params:" + dbCommonPO);
         return baseDao.remove(dbCommonPO);
     }
 
     public Integer update(T t, Where where) {
-        buildParams(t, where, "update");
+        buildParams(t, null, where, "update");
         logger.info("Function Update.Params:" + dbCommonPO);
         return baseDao.update(dbCommonPO);
     }
 
     public BaseEntity get(Where where) {
-        buildParams(null, where, null);
+        buildParams(null, null, where, null);
         logger.info("Function Get.Params:" + dbCommonPO);
         return buildBaseEntity(baseDao.get(dbCommonPO), where);
     }
 
-    private void buildParams(T t, Where where, String type) {
+    @Override
+    public BaseEntity get(List<String> selectColumns, Where where) {
+        buildParams(null, selectColumns, where, null);
+        logger.info("Function Get.Params:" + dbCommonPO);
+        return buildBaseEntity(baseDao.get(dbCommonPO), where);
+    }
+
+    private void buildParams(T t, List<String> selectColumns, Where where, String type) {
         dbCommonPO = new DBCommonPO();
         if (null != t) {
             //获取表名
@@ -107,6 +115,9 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     dbCommonPO.setUpdateColumns(updateColumnsList);
                     break;
             }
+        }
+        if (!CollectionUtils.isEmpty(selectColumns)) {
+            dbCommonPO.setSelectColumns(selectColumns);
         }
         if (null != where) {
             dbCommonPO.setTableName(getTableName(where.getClazz()));

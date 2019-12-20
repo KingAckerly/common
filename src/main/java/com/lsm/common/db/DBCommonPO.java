@@ -6,6 +6,7 @@ import java.util.List;
 public class DBCommonPO {
     private String tableName;
     private PK pk;
+    private List<String> selectColumns;
     private SaveColumns saveColumns;
     private List<UpdateColumns> updateColumns;
     private List<Where> wheres;
@@ -25,6 +26,15 @@ public class DBCommonPO {
 
     public DBCommonPO setPk(PK pk) {
         this.pk = pk;
+        return this;
+    }
+
+    public List<String> getSelectColumns() {
+        return selectColumns;
+    }
+
+    public DBCommonPO setSelectColumns(List<String> selectColumns) {
+        this.selectColumns = selectColumns;
         return this;
     }
 
@@ -60,6 +70,7 @@ public class DBCommonPO {
         return "DBCommonPO{" +
                 "tableName='" + tableName + '\'' +
                 ", pk=" + pk +
+                ", selectColumns=" + selectColumns +
                 ", saveColumns=" + saveColumns +
                 ", updateColumns=" + updateColumns +
                 ", wheres=" + wheres +

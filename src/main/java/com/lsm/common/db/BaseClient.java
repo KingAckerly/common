@@ -39,5 +39,9 @@ public interface BaseClient<T> {
 
     Integer update(T t, Where where);
 
+    Integer getCount(T t, Where where);
+
     BaseEntity get(T t, Where where, List<String> selectColumns);
+
+    List<BaseEntity> list(T t, Where where, List<String> selectColumns);
 }

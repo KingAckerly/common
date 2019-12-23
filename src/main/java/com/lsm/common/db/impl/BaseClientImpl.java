@@ -56,6 +56,13 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     }
 
     @Override
+    public Integer getCount(T t, Where where) {
+        buildParams(t, null, where, "common");
+        logger.info("Function GetCount.Params:" + dbCommonPO);
+        return baseDao.getCount(dbCommonPO);
+    }
+
+    @Override
     public BaseEntity get(T t, Where where, List<String> selectColumns) {
         if (CollectionUtils.isEmpty(selectColumns)) {
             buildParams(t, null, where, "common");
@@ -64,6 +71,18 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         }
         logger.info("Function Get.Params:" + dbCommonPO);
         return buildBaseEntity(t, baseDao.get(dbCommonPO));
+    }
+
+    @Override
+    public List<BaseEntity> list(T t, Where where, List<String> selectColumns) {
+        if (CollectionUtils.isEmpty(selectColumns)) {
+            buildParams(t, null, where, "common");
+        } else {
+            buildParams(t, selectColumns, where, "common");
+        }
+        logger.info("Function List.Params:" + dbCommonPO);
+        //return buildBaseEntity(t, baseDao.get(dbCommonPO));
+        return null;
     }
 
     private void buildParams(T t, List<String> selectColumns, Where where, String type) {

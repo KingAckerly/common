@@ -9,7 +9,8 @@ public class Where {
     private String relation;
     private String field;
     private String expression;
-    private String value;
+    private String frontValue;
+    private String afterValue;
     private List<Where> wheres = new ArrayList<Where>();
 
     public String getRelation() {
@@ -39,15 +40,23 @@ public class Where {
         return this;
     }
 
-    public String getValue() {
-        return value;
+    public String getFrontValue() {
+        return frontValue;
     }
 
-    public Where setValue(String value) {
-        this.value = value;
+    public Where setFrontValue(String frontValue) {
+        this.frontValue = frontValue;
         return this;
     }
 
+    public String getAfterValue() {
+        return afterValue;
+    }
+
+    public Where setAfterValue(String afterValue) {
+        this.afterValue = afterValue;
+        return this;
+    }
 
     public List<Where> getWheres() {
         return wheres;
@@ -58,12 +67,28 @@ public class Where {
         return this;
     }
 
-    public void and(String field, String expression, String value) {
-        this.wheres.add(new Where().setRelation("and").setField(field).setExpression(expression).setValue(value));
+    public void and(String field, String expression) {
+        this.wheres.add(new Where().setRelation("and").setField(field).setExpression(expression));
     }
 
-    public void or(String field, String expression, String value) {
-        this.wheres.add(new Where().setRelation("or").setField(field).setExpression(expression).setValue(value));
+    public void and(String field, String expression, String frontValue) {
+        this.wheres.add(new Where().setRelation("and").setField(field).setExpression(expression).setFrontValue(frontValue));
+    }
+
+    public void and(String field, String expression, String frontValue, String afterValue) {
+        this.wheres.add(new Where().setRelation("and").setField(field).setExpression(expression).setFrontValue(frontValue).setAfterValue(afterValue));
+    }
+
+    public void or(String field, String expression) {
+        this.wheres.add(new Where().setRelation("or").setField(field).setExpression(expression));
+    }
+
+    public void or(String field, String expression, String frontValue) {
+        this.wheres.add(new Where().setRelation("or").setField(field).setExpression(expression).setFrontValue(frontValue));
+    }
+
+    public void or(String field, String expression, String frontValue, String afterValue) {
+        this.wheres.add(new Where().setRelation("or").setField(field).setExpression(expression).setFrontValue(frontValue).setAfterValue(afterValue));
     }
 
     @Override
@@ -72,7 +97,8 @@ public class Where {
                 "relation='" + relation + '\'' +
                 ", field='" + field + '\'' +
                 ", expression='" + expression + '\'' +
-                ", value='" + value + '\'' +
+                ", frontValue='" + frontValue + '\'' +
+                ", afterValue='" + afterValue + '\'' +
                 ", wheres=" + wheres +
                 '}';
     }

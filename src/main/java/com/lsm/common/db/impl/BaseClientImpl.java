@@ -35,7 +35,12 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     public Integer save(T t) {
         buildParams(t, null, null, "insert");
         logger.info("Function Save.Params:" + dbCommonPO);
-        return baseDao.save(dbCommonPO);
+        baseDao.save(dbCommonPO);
+        if (null != dbCommonPO.getPk() && null != dbCommonPO.getPk().getKeyValue()) {
+            return Integer.valueOf(dbCommonPO.getPk().getKeyValue().toString());
+        } else {
+            return 0;
+        }
     }
 
     public Integer remove(T t, Where where) {

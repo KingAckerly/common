@@ -81,8 +81,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
             buildParams(t, selectColumns, where, "common");
         }
         logger.info("Function List.Params:" + dbCommonPO);
-        //return buildBaseEntity(t, baseDao.get(dbCommonPO));
-        return null;
+        return buildBaseEntity(t, baseDao.list(dbCommonPO));
     }
 
     private void buildParams(T t, List<String> selectColumns, Where where, String type) {
@@ -157,13 +156,28 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     }
 
     public BaseEntity buildBaseEntity(T t, HashMap<String, Object> hashMap) {
-        if (null != hashMap) {
+        if (null == hashMap) {
+            return null;
+        }
+        baseMap = new HashMap<>();
+        for (Map.Entry<String, Object> item : hashMap.entrySet()) {
+            baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
+        }
+        return (BaseEntity) MapUtil.mapToEntity(baseMap, t.getClass());
+    }
+
+    public List<BaseEntity> buildBaseEntity(T t, List<HashMap> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        List<BaseEntity> baseEntityList = new ArrayList<>();
+        for (HashMap<String, Object> map : list) {
             baseMap = new HashMap<>();
-            for (Map.Entry<String, Object> item : hashMap.entrySet()) {
+            for (Map.Entry<String, Object> item : map.entrySet()) {
                 baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
             }
-            return (BaseEntity) MapUtil.mapToEntity(baseMap, t.getClass());
+            baseEntityList.add((BaseEntity) MapUtil.mapToEntity(baseMap, t.getClass()));
         }
-        return null;
+        return baseEntityList;
     }
 }

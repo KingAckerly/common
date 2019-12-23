@@ -11,6 +11,8 @@ public class Where {
     private String expression;
     private String frontValue;
     private String afterValue;
+    private List<String> orderFields;
+    private String type;
     private List<Where> wheres = new ArrayList<Where>();
 
     public String getRelation() {
@@ -58,6 +60,24 @@ public class Where {
         return this;
     }
 
+    public List<String> getOrderFields() {
+        return orderFields;
+    }
+
+    public Where setOrderFields(List<String> orderFields) {
+        this.orderFields = orderFields;
+        return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Where setType(String type) {
+        this.type = type;
+        return this;
+    }
+
     public List<Where> getWheres() {
         return wheres;
     }
@@ -91,6 +111,11 @@ public class Where {
         this.wheres.add(new Where().setRelation("or").setField(field).setExpression(expression).setFrontValue(frontValue).setAfterValue(afterValue));
     }
 
+    public void orderBy(List<String> orderFields, String type) {
+        this.orderFields = orderFields;
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "Where{" +
@@ -99,6 +124,8 @@ public class Where {
                 ", expression='" + expression + '\'' +
                 ", frontValue='" + frontValue + '\'' +
                 ", afterValue='" + afterValue + '\'' +
+                ", orderFields=" + orderFields +
+                ", type='" + type + '\'' +
                 ", wheres=" + wheres +
                 '}';
     }

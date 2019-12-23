@@ -77,6 +77,13 @@
             AND ${pk.keyId} = #{pk.keyValue}
         </if>
         <include refid="where"></include>
+        <!--<if test="wheres != null and wheres.size()>0">
+            ORDER BY
+            <foreach collection="wheres" item="item" separator=",">
+                ${item.orderFields}
+            </foreach>
+            ${item.type}
+        </if>-->
     </select>
     <sql id="where">
         <if test="wheres != null and wheres.size()>0">

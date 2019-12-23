@@ -10,7 +10,6 @@ public class Where {
     private String field;
     private String expression;
     private String value;
-    private Class<?> clazz;
     private List<Where> wheres = new ArrayList<Where>();
 
     public String getRelation() {
@@ -49,14 +48,6 @@ public class Where {
         return this;
     }
 
-    public Class<?> getClazz() {
-        return clazz;
-    }
-
-    public Where setClazz(Class<?> clazz) {
-        this.clazz = clazz;
-        return this;
-    }
 
     public List<Where> getWheres() {
         return wheres;
@@ -75,11 +66,14 @@ public class Where {
         this.wheres.add(new Where().setRelation("or").setField(field).setExpression(expression).setValue(value));
     }
 
-    public Where(Class<?> clazz) {
-        this.clazz = clazz;
-    }
-
-    public Where() {
-
+    @Override
+    public String toString() {
+        return "Where{" +
+                "relation='" + relation + '\'' +
+                ", field='" + field + '\'' +
+                ", expression='" + expression + '\'' +
+                ", value='" + value + '\'' +
+                ", wheres=" + wheres +
+                '}';
     }
 }

@@ -18,8 +18,11 @@
     </insert>
     <delete id="remove" parameterType="com.lsm.common.db.DBCommonPO">
         DELETE FROM ${tableName}
+        WHERE 1 = 1
+        <if test="pk != null">
+            AND ${pk.keyId} = #{pk.keyValue}
+        </if>
         <if test="wheres != null and wheres.size()>0">
-            WHERE 1 = 1
             <foreach collection="wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}
@@ -36,8 +39,11 @@
         <foreach collection="updateColumns" item="item" index="index" separator=",">
             ${item.column} = #{item.value}
         </foreach>
+        WHERE is_delete = 0
+        <if test="pk != null">
+            AND ${pk.keyId} = #{pk.keyValue}
+        </if>
         <if test="wheres != null and wheres.size()>0">
-            WHERE is_delete = 0
             <foreach collection="wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}
@@ -59,8 +65,11 @@
         <if test="selectColumns == null">
             SELECT * FROM ${tableName}
         </if>
+        WHERE 1 = 1
+        <if test="pk != null">
+            AND ${pk.keyId} = #{pk.keyValue}
+        </if>
         <if test="wheres != null and wheres.size()>0">
-            WHERE 1 = 1
             <foreach collection="wheres" item="item">
                 <if test="item.relation=='and'">
                     AND ${item.field} ${item.expression} #{item.value}

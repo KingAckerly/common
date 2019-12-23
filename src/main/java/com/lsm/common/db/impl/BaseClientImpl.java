@@ -38,8 +38,8 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         return baseDao.save(dbCommonPO);
     }
 
-    public Integer remove(Where where) {
-        buildParams(null, null, where, null);
+    public Integer remove(T t, Where where) {
+        buildParams(t, null, where, "common");
         logger.info("Function Remove.Params:" + dbCommonPO);
         return baseDao.remove(dbCommonPO);
     }
@@ -50,17 +50,15 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         return baseDao.update(dbCommonPO);
     }
 
-    public BaseEntity get(Where where) {
-        buildParams(null, null, where, null);
-        logger.info("Function Get.Params:" + dbCommonPO);
-        return buildBaseEntity(baseDao.get(dbCommonPO), where);
-    }
-
     @Override
-    public BaseEntity get(List<String> selectColumns, Where where) {
-        buildParams(null, selectColumns, where, null);
+    public BaseEntity get(T t, Where where, List<String> selectColumns) {
+        if (CollectionUtils.isEmpty(selectColumns)) {
+            buildParams(t, null, where, "common");
+        } else {
+            buildParams(t, selectColumns, where, "common");
+        }
         logger.info("Function Get.Params:" + dbCommonPO);
-        return buildBaseEntity(baseDao.get(dbCommonPO), where);
+        return buildBaseEntity(t, baseDao.get(dbCommonPO));
     }
 
     private void buildParams(T t, List<String> selectColumns, Where where, String type) {
@@ -114,31 +112,33 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     }
                     dbCommonPO.setUpdateColumns(updateColumnsList);
                     break;
+                case "common":
+                    try {
+                        for (Field field : fields) {
+                            field.setAccessible(true);
+                            if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
+                                dbCommonPO.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
+                            }
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+            }
+            dbCommonPO.setSelectColumns(selectColumns);
+            if (null != where) {
+                dbCommonPO.setWheres(where.getWheres());
             }
         }
-        if (!CollectionUtils.isEmpty(selectColumns)) {
-            dbCommonPO.setSelectColumns(selectColumns);
-        }
-        if (null != where) {
-            dbCommonPO.setTableName(getTableName(where.getClazz()));
-            dbCommonPO.setWheres(where.getWheres());
-        }
     }
 
-    public BaseEntity buildBaseEntity(HashMap<String, Object> hashMap, Where where) {
-        baseMap = new HashMap<>();
-        for (Map.Entry<String, Object> item : hashMap.entrySet()) {
-            baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
-        }
-        return (BaseEntity) MapUtil.mapToEntity(baseMap, where.getClazz());
-    }
-
-    public String getTableName(Class<?> clazz) {
-        // 判断是否有Table注解
-        if (clazz.isAnnotationPresent(Table.class)) {
-            // 获取注解对象
-            Table table = clazz.getAnnotation(Table.class);
-            return table.value();
+    public BaseEntity buildBaseEntity(T t, HashMap<String, Object> hashMap) {
+        if (null != hashMap) {
+            baseMap = new HashMap<>();
+            for (Map.Entry<String, Object> item : hashMap.entrySet()) {
+                baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
+            }
+            return (BaseEntity) MapUtil.mapToEntity(baseMap, t.getClass());
         }
         return null;
     }

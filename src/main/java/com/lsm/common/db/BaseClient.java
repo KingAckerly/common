@@ -35,11 +35,9 @@ public interface BaseClient<T> {
 
     Integer save(T t);
 
-    Integer remove(Where where);
+    Integer remove(T t, Where where);
 
     Integer update(T t, Where where);
 
-    BaseEntity get(Where where);
-
-    BaseEntity get(List<String> selectColumns, Where where);
+    BaseEntity get(T t, Where where, List<String> selectColumns);
 }

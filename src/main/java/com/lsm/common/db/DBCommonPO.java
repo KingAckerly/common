@@ -9,7 +9,7 @@ public class DBCommonPO {
     private List<String> selectColumns;
     private SaveColumns saveColumns;
     private List<UpdateColumns> updateColumns;
-    private List<Where> wheres;
+    private Where where;
 
     public String getTableName() {
         return tableName;
@@ -56,12 +56,12 @@ public class DBCommonPO {
         return this;
     }
 
-    public List<Where> getWheres() {
-        return wheres;
+    public Where getWhere() {
+        return where;
     }
 
-    public DBCommonPO setWheres(List<Where> wheres) {
-        this.wheres = wheres;
+    public DBCommonPO setWhere(Where where) {
+        this.where = where;
         return this;
     }
 
@@ -73,7 +73,7 @@ public class DBCommonPO {
                 ", selectColumns=" + selectColumns +
                 ", saveColumns=" + saveColumns +
                 ", updateColumns=" + updateColumns +
-                ", wheres=" + wheres +
+                ", where=" + where +
                 '}';
     }
 }

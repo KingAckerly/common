@@ -77,17 +77,11 @@
             AND ${pk.keyId} = #{pk.keyValue}
         </if>
         <include refid="where"></include>
-        <!--<if test="wheres != null and wheres.size()>0">
-            ORDER BY
-            <foreach collection="wheres" item="item" separator=",">
-                ${item.orderFields}
-            </foreach>
-            ${item.type}
-        </if>-->
+        <include refid="orderBy"></include>
     </select>
     <sql id="where">
-        <if test="wheres != null and wheres.size()>0">
-            <foreach collection="wheres" item="item">
+        <if test="where != null and where.wherePOS != null and where.wherePOS.size()>0">
+            <foreach collection="where.wherePOS" item="item">
                 ${item.relation}
                 <choose>
                     <when test="item.expression == 'BETWEEN' or item.expression == 'NOT BETWEEN'">
@@ -101,6 +95,15 @@
                     </otherwise>
                 </choose>
             </foreach>
+        </if>
+    </sql>
+    <sql id="orderBy">
+        <if test="where != null and where.orderFields != null and where.orderFields.size()>0 and where.type != null">
+            ORDER BY
+            <foreach collection="where.orderFields" item="item" separator=",">
+                ${item}
+            </foreach>
+            ${where.type}
         </if>
     </sql>
 </mapper>

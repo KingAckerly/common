@@ -150,7 +150,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
             }
             dbCommonPO.setSelectColumns(selectColumns);
             if (null != where) {
-                dbCommonPO.setWheres(where.getWheres());
+                dbCommonPO.setWhere(where);
             }
         }
     }

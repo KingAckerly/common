@@ -43,10 +43,17 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         }
     }
 
+    @Override
     public Integer remove(T t, Where where) {
-        buildParams(t, null, where, "common");
+        buildParams(t, null, where, "remove");
         logger.info("Function Remove.Params:" + dbCommonPO);
         return baseDao.remove(dbCommonPO);
+    }
+
+    public Integer delete(T t, Where where) {
+        buildParams(t, null, where, "common");
+        logger.info("Function Delete.Params:" + dbCommonPO);
+        return baseDao.delete(dbCommonPO);
     }
 
     public Integer update(T t, Where where) {
@@ -116,6 +123,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     }
                     dbCommonPO.setSaveColumns(new SaveColumns().setColums(saveColumns).setValues(saveValues));
                     break;
+                case "remove":
                 case "update":
                     List<UpdateColumns> updateColumnsList = new ArrayList<>();
                     try {

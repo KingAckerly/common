@@ -11,6 +11,8 @@ public interface BaseDao {
 
     Integer remove(DBCommonPO dbCommonPO);
 
+    Integer delete(DBCommonPO dbCommonPO);
+
     Integer update(DBCommonPO dbCommonPO);
 
     Integer getCount(DBCommonPO dbCommonPO);

@@ -4,19 +4,38 @@
     <insert id="save" parameterType="com.lsm.common.db.DBCommonPO" useGeneratedKeys="true" keyProperty="pk.keyValue">
         INSERT INTO ${tableName} (
         creater_time,
-        is_delete,
-        <foreach collection="saveColumns.colums" item="item" index="index" separator=",">
-            ${item}
-        </foreach>
+        is_delete
+        <if test="saveColumns != null and saveColumns.colums != null and saveColumns.colums.size()>0">
+            <foreach collection="saveColumns.colums" item="item" index="index" open="," separator=",">
+                ${item}
+            </foreach>
+        </if>
         ) VALUES (
         NOW(),
-        0,
-        <foreach collection="saveColumns.values" item="item" index="index" separator=",">
-            #{item}
-        </foreach>
+        0
+        <if test="saveColumns != null and saveColumns.values != null and saveColumns.values.size()>0">
+            <foreach collection="saveColumns.values" item="item" index="index" open="," separator=",">
+                #{item}
+            </foreach>
+        </if>
         )
     </insert>
-    <delete id="remove" parameterType="com.lsm.common.db.DBCommonPO">
+    <update id="remove" parameterType="com.lsm.common.db.DBCommonPO">
+        UPDATE ${tableName} SET
+        updater_time = NOW(),
+        is_delete = 1
+        <if test="updateColumns != null and updateColumns.size()>0">
+            <foreach collection="updateColumns" item="item" index="index" open="," separator=",">
+                ${item.column} = #{item.value}
+            </foreach>
+        </if>
+        WHERE is_delete = 0
+        <if test="pk != null">
+            AND ${pk.keyId} = #{pk.keyValue}
+        </if>
+        <include refid="where"></include>
+    </update>
+    <delete id="delete" parameterType="com.lsm.common.db.DBCommonPO">
         DELETE FROM ${tableName}
         WHERE 1 = 1
         <if test="pk != null">
@@ -26,10 +45,12 @@
     </delete>
     <update id="update" parameterType="com.lsm.common.db.DBCommonPO">
         UPDATE ${tableName} SET
-        updater_time = NOW(),
-        <foreach collection="updateColumns" item="item" index="index" separator=",">
-            ${item.column} = #{item.value}
-        </foreach>
+        updater_time = NOW()
+        <if test="updateColumns != null and updateColumns.size()>0">
+            <foreach collection="updateColumns" item="item" index="index" open="," separator=",">
+                ${item.column} = #{item.value}
+            </foreach>
+        </if>
         WHERE is_delete = 0
         <if test="pk != null">
             AND ${pk.keyId} = #{pk.keyValue}

@@ -37,6 +37,8 @@ public interface BaseClient<T> {
 
     Integer remove(T t, Where where);
 
+    Integer delete(T t, Where where);
+
     Integer update(T t, Where where);
 
     Integer getCount(T t, Where where);

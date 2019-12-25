@@ -33,17 +33,19 @@ import java.util.List;
  */
 public interface BaseClient<T> {
 
-    Integer save(T t);
+    //    Integer save(T t);
+    Integer saveBatch(List<T> list, Integer userId);
 
-    Integer remove(T t, Where where);
-
-    Integer delete(T t, Where where);
-
-    Integer update(T t, Where where);
-
-    Integer getCount(T t, Where where);
-
-    BaseEntity get(T t, Where where, List<String> selectColumns);
-
-    List<BaseEntity> list(T t, Where where, List<String> selectColumns);
+    //    Integer remove(T t, Where where);
+//
+//    Integer delete(T t, Where where);
+    Integer deleteBatch(Class<?> clazz, List<Integer> ids);
+//
+//    Integer update(T t, Where where);
+//
+//    Integer getCount(T t, Where where);
+//
+//    BaseEntity get(T t, Where where, List<String> selectColumns);
+//
+//    List<BaseEntity> list(T t, Where where, List<String> selectColumns);
 }

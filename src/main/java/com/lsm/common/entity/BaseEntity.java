@@ -11,17 +11,17 @@ public class BaseEntity {
 
     @Id(value = "ID")
     private Integer id;
-    @Column(value = "CREATER_ID")
+    //@Column(value = "CREATER_ID")
     private Integer createrId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @Column(value = "CREATER_TIME")
+    //@Column(value = "CREATER_TIME")
     private Date createrTime;
-    @Column(value = "UPDATER_ID")
+    //@Column(value = "UPDATER_ID")
     private Integer updaterId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @Column(value = "UPDATER_TIME")
+    //@Column(value = "UPDATER_TIME")
     private Date updaterTime;
-    @Column(value = "IS_DELETE")
+    //@Column(value = "IS_DELETE")
     private Integer isDelete;
 
     public Integer getId() {

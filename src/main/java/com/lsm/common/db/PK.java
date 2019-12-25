@@ -1,9 +1,12 @@
 package com.lsm.common.db;
 
 
+import java.util.List;
+
 public class PK {
     private String keyId;
     private Object keyValue;
+    private List<Integer> keyValues;
 
     public String getKeyId() {
         return keyId;
@@ -23,11 +26,21 @@ public class PK {
         return this;
     }
 
+    public List<Integer> getKeyValues() {
+        return keyValues;
+    }
+
+    public PK setKeyValues(List<Integer> keyValues) {
+        this.keyValues = keyValues;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "PK{" +
-                "keyId=" + keyId +
+                "keyId='" + keyId + '\'' +
                 ", keyValue=" + keyValue +
+                ", keyValues=" + keyValues +
                 '}';
     }
 }

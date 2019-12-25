@@ -12,6 +12,7 @@ import com.lsm.common.util.UnderlineHumpUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -31,8 +32,16 @@ public class BaseClientImpl<T> implements BaseClient<T> {
 
     private DBCommonPO dbCommonPO;
 
+    private List<DBCommonPO> dbCommonPOList;
 
-    public Integer save(T t) {
+    private DBInputData dbInputData;
+
+    private DBInputDataInfo dbInputDataInfo;
+
+    private List<DBInputDataInfo> dbInputDataInfoList;
+
+
+    /*public Integer save(T t) {
         buildParams(t, null, null, "insert");
         logger.info("Function Save.Params:" + dbCommonPO);
         baseDao.save(dbCommonPO);
@@ -41,35 +50,48 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         } else {
             return 0;
         }
-    }
+    }*/
 
     @Override
+    public Integer saveBatch(List<T> list, Integer userId) {
+        buildParams("saveBatch", list, null, null, null, null, userId);
+        logger.info("Function SaveBatch.Params:" + dbInputData);
+        return baseDao.saveBatch(dbInputData);
+    }
+
+    /*@Override
     public Integer remove(T t, Where where) {
         buildParams(t, null, where, "remove");
         logger.info("Function Remove.Params:" + dbCommonPO);
         return baseDao.remove(dbCommonPO);
-    }
+    }*/
 
-    public Integer delete(T t, Where where) {
+    /*public Integer delete(T t, Where where) {
         buildParams(t, null, where, "common");
         logger.info("Function Delete.Params:" + dbCommonPO);
         return baseDao.delete(dbCommonPO);
+    }*/
+
+    public Integer deleteBatch(Class<?> clazz, List<Integer> ids) {
+        buildParams("deleteBatch", null, clazz, ids, null, null, null);
+        logger.info("Function DeleteBatch.Params:" + dbInputData);
+        return baseDao.deleteBatch(dbInputData);
     }
 
-    public Integer update(T t, Where where) {
+    /*public Integer update(T t, Where where) {
         buildParams(t, null, where, "update");
         logger.info("Function Update.Params:" + dbCommonPO);
         return baseDao.update(dbCommonPO);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public Integer getCount(T t, Where where) {
         buildParams(t, null, where, "common");
         logger.info("Function GetCount.Params:" + dbCommonPO);
         return baseDao.getCount(dbCommonPO);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public BaseEntity get(T t, Where where, List<String> selectColumns) {
         if (CollectionUtils.isEmpty(selectColumns)) {
             buildParams(t, null, where, "common");
@@ -78,9 +100,9 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         }
         logger.info("Function Get.Params:" + dbCommonPO);
         return buildBaseEntity(t, baseDao.get(dbCommonPO));
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<BaseEntity> list(T t, Where where, List<String> selectColumns) {
         if (CollectionUtils.isEmpty(selectColumns)) {
             buildParams(t, null, where, "common");
@@ -89,9 +111,9 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         }
         logger.info("Function List.Params:" + dbCommonPO);
         return buildBaseEntity(t, baseDao.list(dbCommonPO));
-    }
+    }*/
 
-    private void buildParams(T t, List<String> selectColumns, Where where, String type) {
+    /*private void buildParams(T t, List<String> selectColumns, Where where, String type) {
         dbCommonPO = new DBCommonPO();
         if (null != t) {
             //获取表名
@@ -161,6 +183,142 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                 dbCommonPO.setWhere(where);
             }
         }
+    }*/
+
+    /*private void buildParams(List<T> list, List<String> selectColumns, Where where, String type) {
+        if (CollectionUtils.isEmpty(list)) {
+            throw new RuntimeException("List<T> list IS NULL OR IS EMPTY.");
+        }
+        try {
+            T temp = list.get(0);
+            //获取表名
+            if (null == temp.getClass().getAnnotation(Table.class)) {
+                throw new RuntimeException("Error Input Object! Error @Table Annotation.");
+            }
+            dbInputData = new DBInputData();
+            dbInputData.setTableName(temp.getClass().getAnnotation(Table.class).value());
+            List<Field> fields = FieldsUtil.getFields(temp.getClass());
+            //要操作的列
+            List<String> colums = new ArrayList<>();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (null != field.getAnnotation(Column.class) && null != field.get(temp)) {
+                    colums.add(field.getAnnotation(Column.class).value());
+                }
+            }
+            dbInputData.setColums(colums);
+            //遍历
+            dbInputDataInfoList = new ArrayList<>();
+            for (T t : list) {
+                List<Object> values = new ArrayList<>();
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    if (null != field.getAnnotation(Column.class) && null != field.get(t)) {
+                        values.add(field.get(t));
+                    }
+                }
+                dbInputDataInfo = new DBInputDataInfo();
+                dbInputDataInfo.setValues(values);
+                dbInputDataInfoList.add(dbInputDataInfo);
+            }
+            dbInputData.setDbInputDataInfoList(dbInputDataInfoList);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }*/
+
+    private void buildParams(String type, List<T> list, Class<?> clazz, List<Integer> ids, List<String> selectColumns, Where where, Integer userId) {
+        try {
+            List<Field> fields;
+            switch (type) {
+                case "save":
+                case "saveBatch":
+                    if (CollectionUtils.isEmpty(list)) {
+                        throw new RuntimeException("List<T> list IS NULL OR IS EMPTY.");
+                    }
+                    T temp = list.get(0);
+                    //获取表名
+                    if (null == temp.getClass().getAnnotation(Table.class)) {
+                        throw new RuntimeException("Error Input Object! Error @Table Annotation.");
+                    }
+                    dbInputData = new DBInputData();
+                    dbInputData.setCreaterId(userId);
+                    dbInputData.setTableName(temp.getClass().getAnnotation(Table.class).value());
+                    fields = FieldsUtil.getFields(temp.getClass());
+                    //要操作的列
+                    List<String> colums = new ArrayList<>();
+                    for (Field field : fields) {
+                        field.setAccessible(true);
+                        if (null != field.getAnnotation(Column.class)) {
+                            colums.add(field.getAnnotation(Column.class).value());
+                        }
+                    }
+                    dbInputData.setColums(colums);
+                    //遍历
+                    dbInputDataInfoList = new ArrayList<>();
+                    for (T t : list) {
+                        List<Object> values = new ArrayList<>();
+                        for (Field field : fields) {
+                            field.setAccessible(true);
+                            if (null != field.getAnnotation(Column.class)) {
+                                values.add(field.get(t));
+                            }
+                        }
+                        dbInputDataInfo = new DBInputDataInfo();
+                        dbInputDataInfo.setValues(values);
+                        dbInputDataInfoList.add(dbInputDataInfo);
+                    }
+                    dbInputData.setDbInputDataInfoList(dbInputDataInfoList);
+                    break;
+                case "remove":
+                case "removeBatch":
+                case "delete":
+                case "deleteBatch":
+                    if (null == clazz) {
+                        throw new RuntimeException("Class<?> clazz IS NULL.");
+                    }
+                    dbInputData = new DBInputData();
+                    dbInputData.setTableName(getTableName(clazz));
+                    dbInputData.setPk(new PK().setKeyId(getPK(clazz)).setKeyValues(ids));
+                    if (null != where) {
+                        dbInputData.setWhere(where);
+                    }
+                    if (null != userId) {
+                        dbInputData.setUpdaterId(userId);
+                    }
+                    break;
+                case "update":
+                case "updateBatch":
+                case "select":
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getTableName(Class<?> clazz) {
+        // 判断是否有Table注解
+        if (clazz.isAnnotationPresent(Table.class)) {
+            // 获取注解对象
+            Table table = clazz.getAnnotation(Table.class);
+            return table.value();
+        }
+        return null;
+    }
+
+    public String getPK(Class<?> clazz) {
+        Annotation[] annotations = BaseEntity.class.getDeclaredAnnotations();
+        System.out.println(annotations);
+        Class tempClass = clazz;
+        while (!tempClass.isAnnotationPresent(Id.class)) {
+            tempClass = tempClass.getSuperclass();
+        }
+        Id id = clazz.getAnnotation(Id.class);
+        return id.value();
     }
 
     public BaseEntity buildBaseEntity(T t, HashMap<String, Object> hashMap) {

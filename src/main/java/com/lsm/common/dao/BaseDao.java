@@ -14,11 +14,14 @@ public interface BaseDao {
 
     //Integer remove(DBCommonPO dbCommonPO);
 
-    //Integer delete(DBCommonPO dbCommonPO);
+    Integer removeBatch(DBInputData dbInputData);
+
+    //Integer delete(DBInputData dbInputData);
 
     Integer deleteBatch(DBInputData dbInputData);
 
     //Integer update(DBCommonPO dbCommonPO);
+    Integer updateBatch(DBInputData dbInputData);
 
     //Integer getCount(DBCommonPO dbCommonPO);
 

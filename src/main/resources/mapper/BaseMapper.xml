@@ -68,13 +68,14 @@
         <if test="updaterId != null">
             ,updater_id = #{updaterId}
         </if>
+        WHERE is_delete = 0
         <if test="pk.keyValues != null and pk.keyValues.size() > 0">
-            WHERE ${pk.keyId} IN
+            AND ${pk.keyId} IN
             <foreach collection="pk.keyValues" item="item" index="index" open="(" separator="," close=")">
                 #{item}
             </foreach>
-            AND is_delete = 0
         </if>
+        <include refid="where"></include>
     </update>
     <!--<delete id="delete" parameterType="com.lsm.common.db.DBCommonPO">
         DELETE FROM ${tableName}
@@ -86,13 +87,14 @@
     </delete>-->
     <delete id="deleteBatch" parameterType="com.lsm.common.db.DBInputData">
         DELETE FROM ${tableName}
-        <if test="pk.keyValues != null and pk.keyValues.size() > 0">
-            WHERE ${pk.keyId} IN
+        WHERE 1 = 1
+        <if test="pk != null and pk.keyValues != null and pk.keyValues.size() > 0">
+            AND ${pk.keyId} IN
             <foreach collection="pk.keyValues" item="item" index="index" open="(" separator="," close=")">
                 #{item}
             </foreach>
-            <include refid="where"></include>
         </if>
+        <include refid="where"></include>
     </delete>
     <!--<update id="update" parameterType="com.lsm.common.db.DBCommonPO">
         UPDATE ${tableName} SET
@@ -108,20 +110,22 @@
         </if>
         <include refid="where"></include>
     </update>-->
-    <!--<update id="updateBatch" parameterType="com.lsm.common.db.DBInputData">
-        UPDATE ${tableName} SET
-        updater_time = NOW()
-        <if test="updateColumns != null and updateColumns.size()>0">
-            <foreach collection="updateColumns" item="item" index="index" open="," separator=",">
+    <update id="updateBatch" parameterType="java.util.List">
+        <foreach collection="dbInputDataInfoList" item="dbInputDataInfo" index="index" separator=";">
+            update ${dbInputDataInfo.tableName}
+            <if test="dbInputDataInfo.updaterId != null">
+                SET updater_id = #{dbInputDataInfo.updaterId},
+                updater_time = NOW(),
+            </if>
+            <foreach collection="dbInputDataInfo.updateColumns" item="item" separator=",">
                 ${item.column} = #{item.value}
             </foreach>
-        </if>
-        WHERE is_delete = 0
-        <if test="pk != null">
-            AND ${pk.keyId} = #{pk.keyValue}
-        </if>
-        <include refid="where"></include>
-    </update>-->
+            WHERE 1 = 1
+            <if test="dbInputDataInfo.pk != null and dbInputDataInfo.pk.keyValue != null">
+                AND ${dbInputDataInfo.pk.keyId} = #{dbInputDataInfo.pk.keyValue}
+            </if>
+        </foreach>
+    </update>
     <!--<select id="getCount" parameterType="com.lsm.common.db.DBCommonPO" resultType="java.lang.Integer">
         SELECT COUNT(1) FROM ${tableName}
         WHERE 1 = 1

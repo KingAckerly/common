@@ -8,26 +8,14 @@ public class PK {
     private Object keyValue;
     private List<Integer> keyValues;
 
-    public String getKeyId() {
-        return keyId;
-    }
-
     public PK setKeyId(String keyId) {
         this.keyId = keyId;
         return this;
     }
 
-    public Object getKeyValue() {
-        return keyValue;
-    }
-
     public PK setKeyValue(Object keyValue) {
         this.keyValue = keyValue;
         return this;
-    }
-
-    public List<Integer> getKeyValues() {
-        return keyValues;
     }
 
     public PK setKeyValues(List<Integer> keyValues) {

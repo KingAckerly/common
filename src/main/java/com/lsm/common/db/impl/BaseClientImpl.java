@@ -6,6 +6,7 @@ import com.lsm.common.annotation.Table;
 import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.*;
 import com.lsm.common.entity.BaseEntity;
+import com.lsm.common.entity.app.AppEntity;
 import com.lsm.common.util.FieldsUtil;
 import com.lsm.common.util.MapUtil;
 import com.lsm.common.util.UnderlineHumpUtil;
@@ -59,18 +60,39 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         return baseDao.saveBatch(dbInputData);
     }
 
-    /*@Override
-    public Integer remove(T t, Where where) {
-        buildParams(t, null, where, "remove");
-        logger.info("Function Remove.Params:" + dbCommonPO);
-        return baseDao.remove(dbCommonPO);
-    }*/
+    @Override
+    public Integer remove(T t, Where where, Integer userId) {
+        Integer id = ((BaseEntity) t).getId();
+        List<Integer> ids = new ArrayList<>();
+        if (null != id) {
+            ids.add(id);
+        }
+        List<T> list = new ArrayList<>();
+        list.add(t);
+        buildParams("remove", list, t.getClass(), ids, null, where, userId);
+        logger.info("Function Remove.Params:" + dbInputData);
+        return baseDao.removeBatch(dbInputData);
+    }
 
-    /*public Integer delete(T t, Where where) {
-        buildParams(t, null, where, "common");
-        logger.info("Function Delete.Params:" + dbCommonPO);
-        return baseDao.delete(dbCommonPO);
-    }*/
+    @Override
+    public Integer removeBatch(Class<?> clazz, List<Integer> ids, Integer userId) {
+        buildParams("removeBatch", null, clazz, ids, null, null, userId);
+        logger.info("Function RemoveBatch.Params:" + dbInputData);
+        return baseDao.removeBatch(dbInputData);
+    }
+
+    public Integer delete(T t, Where where) {
+        Integer id = ((BaseEntity) t).getId();
+        List<Integer> ids = new ArrayList<>();
+        if (null != id) {
+            ids.add(id);
+        }
+        List<T> list = new ArrayList<>();
+        list.add(t);
+        buildParams("delete", list, t.getClass(), ids, null, where, null);
+        logger.info("Function Delete.Params:" + dbInputData);
+        return baseDao.deleteBatch(dbInputData);
+    }
 
     public Integer deleteBatch(Class<?> clazz, List<Integer> ids) {
         buildParams("deleteBatch", null, clazz, ids, null, null, null);
@@ -83,6 +105,12 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         logger.info("Function Update.Params:" + dbCommonPO);
         return baseDao.update(dbCommonPO);
     }*/
+
+    public Integer updateBatch(List<T> list, Integer userId, Where where) {
+        buildParams("updateBatch", list, null, null, null, where, userId);
+        logger.info("Function UpdateBatch.Params:" + dbInputData);
+        return baseDao.updateBatch(dbInputData);
+    }
 
     /*@Override
     public Integer getCount(T t, Where where) {
@@ -232,13 +260,15 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     private void buildParams(String type, List<T> list, Class<?> clazz, List<Integer> ids, List<String> selectColumns, Where where, Integer userId) {
         try {
             List<Field> fields;
+            T temp;
+            List<String> colums;
             switch (type) {
                 case "save":
                 case "saveBatch":
                     if (CollectionUtils.isEmpty(list)) {
                         throw new RuntimeException("List<T> list IS NULL OR IS EMPTY.");
                     }
-                    T temp = list.get(0);
+                    temp = list.get(0);
                     //获取表名
                     if (null == temp.getClass().getAnnotation(Table.class)) {
                         throw new RuntimeException("Error Input Object! Error @Table Annotation.");
@@ -248,7 +278,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     dbInputData.setTableName(temp.getClass().getAnnotation(Table.class).value());
                     fields = FieldsUtil.getFields(temp.getClass());
                     //要操作的列
-                    List<String> colums = new ArrayList<>();
+                    colums = new ArrayList<>();
                     for (Field field : fields) {
                         field.setAccessible(true);
                         if (null != field.getAnnotation(Column.class)) {
@@ -279,9 +309,23 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     if (null == clazz) {
                         throw new RuntimeException("Class<?> clazz IS NULL.");
                     }
+                    //防止既无ID也无WHERE条件,导致全表误删
+                    if (CollectionUtils.isEmpty(ids) && null == where) {
+                        throw new RuntimeException("(List<Integer> ids IS NULL OR IS EMPTY) AND WHERE where IS NULL.");
+                    }
                     dbInputData = new DBInputData();
                     dbInputData.setTableName(getTableName(clazz));
-                    dbInputData.setPk(new PK().setKeyId(getPK(clazz)).setKeyValues(ids));
+                    //取主键ID
+                    fields = FieldsUtil.getFields(clazz);
+                    PK pk = new PK();
+                    for (Field field : fields) {
+                        field.setAccessible(true);
+                        if (null != field.getAnnotation(Id.class)) {
+                            pk.setKeyId(field.getAnnotation(Id.class).value());
+                        }
+                    }
+                    pk.setKeyValues(ids);
+                    dbInputData.setPk(pk);
                     if (null != where) {
                         dbInputData.setWhere(where);
                     }
@@ -291,11 +335,43 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     break;
                 case "update":
                 case "updateBatch":
+                    if (CollectionUtils.isEmpty(list)) {
+                        throw new RuntimeException("List<T> list IS NULL OR IS EMPTY.");
+                    }
+                    dbInputData = new DBInputData();
+                    dbInputDataInfoList = new ArrayList<>();
+                    for (T t : list) {
+                        if (null == t.getClass().getAnnotation(Table.class)) {
+                            throw new RuntimeException("Error Input Object! Error @Table Annotation.");
+                        }
+                        //校验每个tID必传
+                        if (null == ((BaseEntity) t).getId()) {
+                            throw new RuntimeException("ID IS NULL OR IS EMPTY.");
+                        }
+                        dbInputDataInfo = new DBInputDataInfo();
+                        dbInputDataInfo.setTableName(t.getClass().getAnnotation(Table.class).value());
+                        if (null != userId) {
+                            dbInputDataInfo.setUpdaterId(userId);
+                        }
+                        fields = FieldsUtil.getFields(t.getClass());
+                        List<UpdateColumns> updateColumns = new ArrayList<>();
+                        for (Field field : fields) {
+                            field.setAccessible(true);
+                            if (null != field.getAnnotation(Column.class) && null != field.get(t)) {
+                                updateColumns.add(new UpdateColumns().setColumn(field.getAnnotation(Column.class).value()).setValue(field.get(t)));
+                            }
+                            if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
+                                dbInputDataInfo.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
+                            }
+                        }
+                        dbInputDataInfo.setUpdateColumns(updateColumns);
+                        dbInputDataInfoList.add(dbInputDataInfo);
+                    }
+                    dbInputData.setDbInputDataInfoList(dbInputDataInfoList);
+                    break;
                 case "select":
             }
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -308,17 +384,6 @@ public class BaseClientImpl<T> implements BaseClient<T> {
             return table.value();
         }
         return null;
-    }
-
-    public String getPK(Class<?> clazz) {
-        Annotation[] annotations = BaseEntity.class.getDeclaredAnnotations();
-        System.out.println(annotations);
-        Class tempClass = clazz;
-        while (!tempClass.isAnnotationPresent(Id.class)) {
-            tempClass = tempClass.getSuperclass();
-        }
-        Id id = clazz.getAnnotation(Id.class);
-        return id.value();
     }
 
     public BaseEntity buildBaseEntity(T t, HashMap<String, Object> hashMap) {

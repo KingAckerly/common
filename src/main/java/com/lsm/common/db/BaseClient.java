@@ -36,12 +36,18 @@ public interface BaseClient<T> {
     //    Integer save(T t);
     Integer saveBatch(List<T> list, Integer userId);
 
-    //    Integer remove(T t, Where where);
-//
-//    Integer delete(T t, Where where);
+    Integer remove(T t, Where where, Integer userId);
+
+    Integer removeBatch(Class<?> clazz, List<Integer> ids, Integer userId);
+
+    //
+    Integer delete(T t, Where where);
+
     Integer deleteBatch(Class<?> clazz, List<Integer> ids);
-//
+
+    //
 //    Integer update(T t, Where where);
+    Integer updateBatch(List<T> list, Integer userId, Where where);
 //
 //    Integer getCount(T t, Where where);
 //

@@ -3,6 +3,8 @@ package com.lsm.common.db.impl;
 import annotation.Column;
 import annotation.Id;
 import annotation.Table;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.*;
 import com.lsm.common.util.FieldsUtil;
@@ -118,6 +120,24 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         buildParams("select", null, t, null, null, selectColumns, where, null);
         logger.info("Function List.Params:" + dbInputData);
         return buildBaseEntity(t, baseDao.list(dbInputData));
+    }
+
+    @Override
+    public PageInfo listPage(T t, Where where, List<String> selectColumns, Integer pageNum, Integer pageSize) {
+        buildParams("select", null, t, null, null, selectColumns, where, null);
+        logger.info("Function List.Params:" + dbInputData);
+        //指定页码,每页显示条数
+        PageHelper.startPage(pageNum, pageSize);
+        //查询方法必须紧跟上一行代码
+        List list = baseDao.list(dbInputData);
+        //new PageInfo必须对查出的原始数据进行,如果查出的原始数据有变动过,会导致PageInfo的基本属性如pageNum那些不准确
+        //所以这里通过查出的原始数据list来得到PageInfo对象
+        PageInfo<BaseEntity> pageInfo = new PageInfo<BaseEntity>(list);
+        //接着在这里处理原始数据list,封装成我们最终想要返回的集合
+        List<BaseEntity> baseEntityList = buildBaseEntity(t, list);
+        //覆盖掉得到PageInfo对象时里面的list,来得到最终想要返回的PageInfo
+        pageInfo.setList(baseEntityList);
+        return pageInfo;
     }
 
     private void buildParams(String type, List<T> list, T t, Class<?> clazz, List<Integer> ids, List<String> selectColumns, Where where, Integer userId) {

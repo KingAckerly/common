@@ -1,25 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lsm.common.dao.BaseDao">
-    <!--<insert id="save" parameterType="com.lsm.common.db.DBCommonPO" useGeneratedKeys="true" keyProperty="pk.keyValue">
-        INSERT INTO ${tableName} (
-        creater_time,
-        is_delete
-        <if test="saveColumns != null and saveColumns.colums != null and saveColumns.colums.size()>0">
-            <foreach collection="saveColumns.colums" item="item" index="index" open="," separator=",">
-                ${item}
-            </foreach>
-        </if>
-        ) VALUES (
-        NOW(),
-        0
-        <if test="saveColumns != null and saveColumns.values != null and saveColumns.values.size()>0">
-            <foreach collection="saveColumns.values" item="item" index="index" open="," separator=",">
-                #{item}
-            </foreach>
-        </if>
-        )
-    </insert>-->
     <insert id="saveBatch" parameterType="com.lsm.common.db.DBInputData">
         INSERT INTO ${tableName} (
         creater_id,
@@ -46,21 +27,6 @@
             </foreach>
         </if>
     </insert>
-    <!--<update id="remove" parameterType="com.lsm.common.db.DBCommonPO">
-        UPDATE ${tableName} SET
-        updater_time = NOW(),
-        is_delete = 1
-        <if test="updateColumns != null and updateColumns.size()>0">
-            <foreach collection="updateColumns" item="item" index="index" open="," separator=",">
-                ${item.column} = #{item.value}
-            </foreach>
-        </if>
-        WHERE is_delete = 0
-        <if test="pk != null">
-            AND ${pk.keyId} = #{pk.keyValue}
-        </if>
-        <include refid="where"></include>
-    </update>-->
     <update id="removeBatch" parameterType="com.lsm.common.db.DBInputData">
         UPDATE ${tableName} SET
         updater_time = NOW(),
@@ -77,14 +43,6 @@
         </if>
         <include refid="where"></include>
     </update>
-    <!--<delete id="delete" parameterType="com.lsm.common.db.DBCommonPO">
-        DELETE FROM ${tableName}
-        WHERE 1 = 1
-        <if test="pk != null">
-            AND ${pk.keyId} = #{pk.keyValue}
-        </if>
-        <include refid="where"></include>
-    </delete>-->
     <delete id="deleteBatch" parameterType="com.lsm.common.db.DBInputData">
         DELETE FROM ${tableName}
         WHERE 1 = 1
@@ -96,20 +54,6 @@
         </if>
         <include refid="where"></include>
     </delete>
-    <!--<update id="update" parameterType="com.lsm.common.db.DBCommonPO">
-        UPDATE ${tableName} SET
-        updater_time = NOW()
-        <if test="updateColumns != null and updateColumns.size()>0">
-            <foreach collection="updateColumns" item="item" index="index" open="," separator=",">
-                ${item.column} = #{item.value}
-            </foreach>
-        </if>
-        WHERE is_delete = 0
-        <if test="pk != null">
-            AND ${pk.keyId} = #{pk.keyValue}
-        </if>
-        <include refid="where"></include>
-    </update>-->
     <update id="updateBatch" parameterType="java.util.List">
         <foreach collection="dbInputDataInfoList" item="dbInputDataInfo" index="index" separator=";">
             update ${dbInputDataInfo.tableName}
@@ -124,17 +68,18 @@
             <if test="dbInputDataInfo.pk != null and dbInputDataInfo.pk.keyValue != null">
                 AND ${dbInputDataInfo.pk.keyId} = #{dbInputDataInfo.pk.keyValue}
             </if>
+            <include refid="where"></include>
         </foreach>
     </update>
-    <!--<select id="getCount" parameterType="com.lsm.common.db.DBCommonPO" resultType="java.lang.Integer">
+    <select id="getCount" parameterType="com.lsm.common.db.DBInputData" resultType="java.lang.Integer">
         SELECT COUNT(1) FROM ${tableName}
         WHERE 1 = 1
         <if test="pk != null">
             AND ${pk.keyId} = #{pk.keyValue}
         </if>
         <include refid="where"></include>
-    </select>-->
-    <!--<select id="get" parameterType="com.lsm.common.db.DBCommonPO" resultType="java.util.HashMap">
+    </select>
+    <select id="get" parameterType="com.lsm.common.db.DBInputData" resultType="java.util.HashMap">
         <if test="selectColumns != null and selectColumns.size()>0">
             SELECT
             <foreach collection="selectColumns" item="item" index="index" separator=",">
@@ -150,8 +95,8 @@
             AND ${pk.keyId} = #{pk.keyValue}
         </if>
         <include refid="where"></include>
-    </select>-->
-    <!--<select id="list" parameterType="com.lsm.common.db.DBCommonPO" resultType="java.util.HashMap">
+    </select>
+    <select id="list" parameterType="com.lsm.common.db.DBInputData" resultType="java.util.HashMap">
         <if test="selectColumns != null and selectColumns.size()>0">
             SELECT
             <foreach collection="selectColumns" item="item" index="index" separator=",">
@@ -168,7 +113,7 @@
         </if>
         <include refid="where"></include>
         <include refid="orderBy"></include>
-    </select>-->
+    </select>
     <sql id="where">
         <if test="where != null and where.wherePOS != null and where.wherePOS.size()>0">
             <foreach collection="where.wherePOS" item="item">
@@ -187,7 +132,7 @@
             </foreach>
         </if>
     </sql>
-    <!--<sql id="orderBy">
+    <sql id="orderBy">
         <if test="where != null and where.orderFields != null and where.orderFields.size()>0 and where.type != null">
             ORDER BY
             <foreach collection="where.orderFields" item="item" separator=",">
@@ -195,5 +140,5 @@
             </foreach>
             ${where.type}
         </if>
-    </sql>-->
+    </sql>
 </mapper>

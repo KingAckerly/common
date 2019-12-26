@@ -7,9 +7,7 @@ public class DBInputDataInfo {
     private String tableName;
     private List<Object> values;
     private PK pk;
-    private SaveColumns saveColumns;
     private List<UpdateColumns> updateColumns;
-    private Where where;
     private Integer updaterId;
 
     public String getTableName() {
@@ -39,30 +37,12 @@ public class DBInputDataInfo {
         return this;
     }
 
-    public SaveColumns getSaveColumns() {
-        return saveColumns;
-    }
-
-    public DBInputDataInfo setSaveColumns(SaveColumns saveColumns) {
-        this.saveColumns = saveColumns;
-        return this;
-    }
-
     public List<UpdateColumns> getUpdateColumns() {
         return updateColumns;
     }
 
     public DBInputDataInfo setUpdateColumns(List<UpdateColumns> updateColumns) {
         this.updateColumns = updateColumns;
-        return this;
-    }
-
-    public Where getWhere() {
-        return where;
-    }
-
-    public DBInputDataInfo setWhere(Where where) {
-        this.where = where;
         return this;
     }
 
@@ -81,9 +61,7 @@ public class DBInputDataInfo {
                 "tableName='" + tableName + '\'' +
                 ", values=" + values +
                 ", pk=" + pk +
-                ", saveColumns=" + saveColumns +
                 ", updateColumns=" + updateColumns +
-                ", where=" + where +
                 ", updaterId=" + updaterId +
                 '}';
     }

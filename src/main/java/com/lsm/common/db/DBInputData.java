@@ -7,6 +7,7 @@ public class DBInputData {
     private String tableName;
     private List<String> colums;
     private PK pk;
+    private List<String> selectColumns;
     private Where where;
     private Integer createrId;
     private Integer updaterId;
@@ -36,6 +37,15 @@ public class DBInputData {
 
     public DBInputData setPk(PK pk) {
         this.pk = pk;
+        return this;
+    }
+
+    public List<String> getSelectColumns() {
+        return selectColumns;
+    }
+
+    public DBInputData setSelectColumns(List<String> selectColumns) {
+        this.selectColumns = selectColumns;
         return this;
     }
 
@@ -81,6 +91,7 @@ public class DBInputData {
                 "tableName='" + tableName + '\'' +
                 ", colums=" + colums +
                 ", pk=" + pk +
+                ", selectColumns=" + selectColumns +
                 ", where=" + where +
                 ", createrId=" + createrId +
                 ", updaterId=" + updaterId +

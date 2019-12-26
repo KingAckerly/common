@@ -6,20 +6,19 @@ import com.lsm.common.annotation.Table;
 import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.*;
 import com.lsm.common.entity.BaseEntity;
-import com.lsm.common.entity.app.AppEntity;
 import com.lsm.common.util.FieldsUtil;
 import com.lsm.common.util.MapUtil;
 import com.lsm.common.util.UnderlineHumpUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service(value = "BaseClient")
 public class BaseClientImpl<T> implements BaseClient<T> {
@@ -31,10 +30,6 @@ public class BaseClientImpl<T> implements BaseClient<T> {
 
     private HashMap<String, Object> baseMap;
 
-    private DBCommonPO dbCommonPO;
-
-    private List<DBCommonPO> dbCommonPOList;
-
     private DBInputData dbInputData;
 
     private DBInputDataInfo dbInputDataInfo;
@@ -42,20 +37,9 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     private List<DBInputDataInfo> dbInputDataInfoList;
 
 
-    /*public Integer save(T t) {
-        buildParams(t, null, null, "insert");
-        logger.info("Function Save.Params:" + dbCommonPO);
-        baseDao.save(dbCommonPO);
-        if (null != dbCommonPO.getPk() && null != dbCommonPO.getPk().getKeyValue()) {
-            return Integer.valueOf(dbCommonPO.getPk().getKeyValue().toString());
-        } else {
-            return 0;
-        }
-    }*/
-
     @Override
     public Integer saveBatch(List<T> list, Integer userId) {
-        buildParams("saveBatch", list, null, null, null, null, userId);
+        buildParams("saveBatch", list, null, null, null, null, null, userId);
         logger.info("Function SaveBatch.Params:" + dbInputData);
         return baseDao.saveBatch(dbInputData);
     }
@@ -69,14 +53,14 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         }
         List<T> list = new ArrayList<>();
         list.add(t);
-        buildParams("remove", list, t.getClass(), ids, null, where, userId);
+        buildParams("removeBatch", list, null, t.getClass(), ids, null, where, userId);
         logger.info("Function Remove.Params:" + dbInputData);
         return baseDao.removeBatch(dbInputData);
     }
 
     @Override
     public Integer removeBatch(Class<?> clazz, List<Integer> ids, Integer userId) {
-        buildParams("removeBatch", null, clazz, ids, null, null, userId);
+        buildParams("removeBatch", null, null, clazz, ids, null, null, userId);
         logger.info("Function RemoveBatch.Params:" + dbInputData);
         return baseDao.removeBatch(dbInputData);
     }
@@ -89,181 +73,59 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         }
         List<T> list = new ArrayList<>();
         list.add(t);
-        buildParams("delete", list, t.getClass(), ids, null, where, null);
+        buildParams("deleteBatch", list, null, t.getClass(), ids, null, where, null);
         logger.info("Function Delete.Params:" + dbInputData);
         return baseDao.deleteBatch(dbInputData);
     }
 
     public Integer deleteBatch(Class<?> clazz, List<Integer> ids) {
-        buildParams("deleteBatch", null, clazz, ids, null, null, null);
+        buildParams("deleteBatch", null, null, clazz, ids, null, null, null);
         logger.info("Function DeleteBatch.Params:" + dbInputData);
         return baseDao.deleteBatch(dbInputData);
     }
 
-    /*public Integer update(T t, Where where) {
-        buildParams(t, null, where, "update");
-        logger.info("Function Update.Params:" + dbCommonPO);
-        return baseDao.update(dbCommonPO);
-    }*/
+    public Integer update(T t, Where where, Integer userId) {
+        List<T> list = new ArrayList<>();
+        list.add(t);
+        buildParams("updateBatch", list, null, null, null, null, where, userId);
+        logger.info("Function Update.Params:" + dbInputData);
+        return baseDao.updateBatch(dbInputData);
+    }
 
     public Integer updateBatch(List<T> list, Integer userId, Where where) {
-        buildParams("updateBatch", list, null, null, null, where, userId);
+        buildParams("updateBatch", list, null, null, null, null, where, userId);
         logger.info("Function UpdateBatch.Params:" + dbInputData);
         return baseDao.updateBatch(dbInputData);
     }
 
-    /*@Override
+    @Override
     public Integer getCount(T t, Where where) {
-        buildParams(t, null, where, "common");
-        logger.info("Function GetCount.Params:" + dbCommonPO);
-        return baseDao.getCount(dbCommonPO);
-    }*/
+        //buildParams(t, null, where, "common");
+        buildParams("select", null, t, null, null, null, where, null);
+        logger.info("Function GetCount.Params:" + dbInputData);
+        return baseDao.getCount(dbInputData);
+    }
 
-    /*@Override
+    @Override
     public BaseEntity get(T t, Where where, List<String> selectColumns) {
-        if (CollectionUtils.isEmpty(selectColumns)) {
-            buildParams(t, null, where, "common");
-        } else {
-            buildParams(t, selectColumns, where, "common");
-        }
-        logger.info("Function Get.Params:" + dbCommonPO);
-        return buildBaseEntity(t, baseDao.get(dbCommonPO));
-    }*/
+        buildParams("select", null, t, null, null, selectColumns, where, null);
+        logger.info("Function Get.Params:" + dbInputData);
+        return buildBaseEntity(t, baseDao.get(dbInputData));
+    }
 
-    /*@Override
+    @Override
     public List<BaseEntity> list(T t, Where where, List<String> selectColumns) {
-        if (CollectionUtils.isEmpty(selectColumns)) {
-            buildParams(t, null, where, "common");
-        } else {
-            buildParams(t, selectColumns, where, "common");
-        }
-        logger.info("Function List.Params:" + dbCommonPO);
-        return buildBaseEntity(t, baseDao.list(dbCommonPO));
-    }*/
+        buildParams("select", null, t, null, null, selectColumns, where, null);
+        logger.info("Function List.Params:" + dbInputData);
+        return buildBaseEntity(t, baseDao.list(dbInputData));
+    }
 
-    /*private void buildParams(T t, List<String> selectColumns, Where where, String type) {
-        dbCommonPO = new DBCommonPO();
-        if (null != t) {
-            //获取表名
-            if (null == t.getClass().getAnnotation(Table.class)) {
-                throw new RuntimeException("Error Input Object! Error @Table Annotation.");
-            }
-            dbCommonPO.setTableName(t.getClass().getAnnotation(Table.class).value());
-            List<Field> fields = FieldsUtil.getFields(t.getClass());
-            switch (type) {
-                case "insert":
-                    List<String> saveColumns = new ArrayList<>();
-                    List<Object> saveValues = new ArrayList<>();
-                    try {
-                        for (Field field : fields) {
-                            field.setAccessible(true);
-                            if (null != field.getAnnotation(Column.class) && null != field.get(t)) {
-                                saveColumns.add(field.getAnnotation(Column.class).value());
-                                saveValues.add(field.get(t));
-                            }
-                            if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
-                                dbCommonPO.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
-                            }
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                    if (saveColumns.size() != saveValues.size()) {
-                        throw new RuntimeException("Error Input Object! Internal Error.");
-                    }
-                    dbCommonPO.setSaveColumns(new SaveColumns().setColums(saveColumns).setValues(saveValues));
-                    break;
-                case "remove":
-                case "update":
-                    List<UpdateColumns> updateColumnsList = new ArrayList<>();
-                    try {
-                        for (Field field : fields) {
-                            field.setAccessible(true);
-                            if (null != field.getAnnotation(Column.class) && null != field.get(t)) {
-                                updateColumnsList.add(new UpdateColumns().setColumn(field.getAnnotation(Column.class).value())
-                                        .setValue(field.get(t)));
-                                continue;
-                            }
-                            if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
-                                dbCommonPO.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
-                            }
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                    dbCommonPO.setUpdateColumns(updateColumnsList);
-                    break;
-                case "common":
-                    try {
-                        for (Field field : fields) {
-                            field.setAccessible(true);
-                            if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
-                                dbCommonPO.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
-                            }
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-            }
-            dbCommonPO.setSelectColumns(selectColumns);
-            if (null != where) {
-                dbCommonPO.setWhere(where);
-            }
-        }
-    }*/
-
-    /*private void buildParams(List<T> list, List<String> selectColumns, Where where, String type) {
-        if (CollectionUtils.isEmpty(list)) {
-            throw new RuntimeException("List<T> list IS NULL OR IS EMPTY.");
-        }
-        try {
-            T temp = list.get(0);
-            //获取表名
-            if (null == temp.getClass().getAnnotation(Table.class)) {
-                throw new RuntimeException("Error Input Object! Error @Table Annotation.");
-            }
-            dbInputData = new DBInputData();
-            dbInputData.setTableName(temp.getClass().getAnnotation(Table.class).value());
-            List<Field> fields = FieldsUtil.getFields(temp.getClass());
-            //要操作的列
-            List<String> colums = new ArrayList<>();
-            for (Field field : fields) {
-                field.setAccessible(true);
-                if (null != field.getAnnotation(Column.class) && null != field.get(temp)) {
-                    colums.add(field.getAnnotation(Column.class).value());
-                }
-            }
-            dbInputData.setColums(colums);
-            //遍历
-            dbInputDataInfoList = new ArrayList<>();
-            for (T t : list) {
-                List<Object> values = new ArrayList<>();
-                for (Field field : fields) {
-                    field.setAccessible(true);
-                    if (null != field.getAnnotation(Column.class) && null != field.get(t)) {
-                        values.add(field.get(t));
-                    }
-                }
-                dbInputDataInfo = new DBInputDataInfo();
-                dbInputDataInfo.setValues(values);
-                dbInputDataInfoList.add(dbInputDataInfo);
-            }
-            dbInputData.setDbInputDataInfoList(dbInputDataInfoList);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
-    private void buildParams(String type, List<T> list, Class<?> clazz, List<Integer> ids, List<String> selectColumns, Where where, Integer userId) {
+    private void buildParams(String type, List<T> list, T t, Class<?> clazz, List<Integer> ids, List<String> selectColumns, Where where, Integer userId) {
         try {
             List<Field> fields;
             T temp;
             List<String> colums;
             switch (type) {
-                case "save":
                 case "saveBatch":
                     if (CollectionUtils.isEmpty(list)) {
                         throw new RuntimeException("List<T> list IS NULL OR IS EMPTY.");
@@ -288,12 +150,12 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     dbInputData.setColums(colums);
                     //遍历
                     dbInputDataInfoList = new ArrayList<>();
-                    for (T t : list) {
+                    for (T item : list) {
                         List<Object> values = new ArrayList<>();
                         for (Field field : fields) {
                             field.setAccessible(true);
                             if (null != field.getAnnotation(Column.class)) {
-                                values.add(field.get(t));
+                                values.add(field.get(item));
                             }
                         }
                         dbInputDataInfo = new DBInputDataInfo();
@@ -302,9 +164,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     }
                     dbInputData.setDbInputDataInfoList(dbInputDataInfoList);
                     break;
-                case "remove":
                 case "removeBatch":
-                case "delete":
                 case "deleteBatch":
                     if (null == clazz) {
                         throw new RuntimeException("Class<?> clazz IS NULL.");
@@ -314,7 +174,11 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                         throw new RuntimeException("(List<Integer> ids IS NULL OR IS EMPTY) AND WHERE where IS NULL.");
                     }
                     dbInputData = new DBInputData();
-                    dbInputData.setTableName(getTableName(clazz));
+                    String tableName = getTableName(clazz);
+                    if (StringUtils.isEmpty(tableName)) {
+                        throw new RuntimeException("Error Input Object! Error @Table Annotation.");
+                    }
+                    dbInputData.setTableName(tableName);
                     //取主键ID
                     fields = FieldsUtil.getFields(clazz);
                     PK pk = new PK();
@@ -333,43 +197,68 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                         dbInputData.setUpdaterId(userId);
                     }
                     break;
-                case "update":
                 case "updateBatch":
                     if (CollectionUtils.isEmpty(list)) {
                         throw new RuntimeException("List<T> list IS NULL OR IS EMPTY.");
                     }
                     dbInputData = new DBInputData();
                     dbInputDataInfoList = new ArrayList<>();
-                    for (T t : list) {
-                        if (null == t.getClass().getAnnotation(Table.class)) {
+                    for (T item : list) {
+                        if (null == item.getClass().getAnnotation(Table.class)) {
                             throw new RuntimeException("Error Input Object! Error @Table Annotation.");
                         }
                         //校验每个tID必传
-                        if (null == ((BaseEntity) t).getId()) {
+                        if (null == ((BaseEntity) item).getId()) {
                             throw new RuntimeException("ID IS NULL OR IS EMPTY.");
                         }
                         dbInputDataInfo = new DBInputDataInfo();
-                        dbInputDataInfo.setTableName(t.getClass().getAnnotation(Table.class).value());
+                        dbInputDataInfo.setTableName(item.getClass().getAnnotation(Table.class).value());
                         if (null != userId) {
                             dbInputDataInfo.setUpdaterId(userId);
                         }
-                        fields = FieldsUtil.getFields(t.getClass());
+                        fields = FieldsUtil.getFields(item.getClass());
                         List<UpdateColumns> updateColumns = new ArrayList<>();
                         for (Field field : fields) {
                             field.setAccessible(true);
-                            if (null != field.getAnnotation(Column.class) && null != field.get(t)) {
-                                updateColumns.add(new UpdateColumns().setColumn(field.getAnnotation(Column.class).value()).setValue(field.get(t)));
+                            if (null != field.getAnnotation(Column.class) && null != field.get(item)) {
+                                updateColumns.add(new UpdateColumns().setColumn(field.getAnnotation(Column.class).value()).setValue(field.get(item)));
                             }
-                            if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
-                                dbInputDataInfo.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
+                            if (null != field.getAnnotation(Id.class) && null != field.get(item)) {
+                                dbInputDataInfo.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(item)));
                             }
                         }
                         dbInputDataInfo.setUpdateColumns(updateColumns);
                         dbInputDataInfoList.add(dbInputDataInfo);
                     }
+                    //批量更新目前仅支持多条数据共用同一个WHERE条件
+                    if (null != where) {
+                        dbInputData.setWhere(where);
+                    }
                     dbInputData.setDbInputDataInfoList(dbInputDataInfoList);
                     break;
                 case "select":
+                    if (null == t) {
+                        throw new RuntimeException("T t IS NULL.");
+                    }
+                    if (null == t.getClass().getAnnotation(Table.class)) {
+                        throw new RuntimeException("Error Input Object! Error @Table Annotation.");
+                    }
+                    dbInputData = new DBInputData();
+                    dbInputData.setTableName(t.getClass().getAnnotation(Table.class).value());
+                    fields = FieldsUtil.getFields(t.getClass());
+                    for (Field field : fields) {
+                        field.setAccessible(true);
+                        if (null != field.getAnnotation(Id.class) && null != field.get(t)) {
+                            dbInputData.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(t)));
+                        }
+                    }
+                    if (!CollectionUtils.isEmpty(selectColumns)) {
+                        dbInputData.setSelectColumns(selectColumns);
+                    }
+                    if (null != where) {
+                        dbInputData.setWhere(where);
+                    }
+                    break;
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();

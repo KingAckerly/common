@@ -1,14 +1,14 @@
 package com.lsm.common.db.impl;
 
-import com.lsm.common.annotation.Column;
-import com.lsm.common.annotation.Id;
-import com.lsm.common.annotation.Table;
+import annotation.Column;
+import annotation.Id;
+import annotation.Table;
 import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.*;
-import com.lsm.common.entity.BaseEntity;
 import com.lsm.common.util.FieldsUtil;
 import com.lsm.common.util.MapUtil;
 import com.lsm.common.util.UnderlineHumpUtil;
+import com.lsm.entity.entity.BaseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

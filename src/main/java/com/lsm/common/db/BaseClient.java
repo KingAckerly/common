@@ -1,7 +1,7 @@
 package com.lsm.common.db;
 
 
-import com.lsm.common.entity.BaseEntity;
+import com.lsm.entity.entity.BaseEntity;
 
 import java.util.List;
 

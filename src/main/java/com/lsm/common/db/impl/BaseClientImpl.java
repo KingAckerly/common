@@ -10,7 +10,6 @@ import com.lsm.common.db.*;
 import com.lsm.common.util.FieldsUtil;
 import com.lsm.common.util.MapUtil;
 import com.lsm.common.util.UnderlineHumpUtil;
-//import com.lsm.entity.BaseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,9 +47,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
 
     @Override
     public Integer remove(T t, Where where, Integer userId) {
-        List<T> list = new ArrayList<>();
-        list.add(t);
-        buildParams("removeBatch", list, null, t.getClass(), null, null, where, userId);
+        buildParams("removeBatch", null, t, t.getClass(), null, null, where, userId);
         logger.info("Function Remove.Params:" + dbInputData);
         return baseDao.removeBatch(dbInputData);
     }
@@ -63,9 +60,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     }
 
     public Integer delete(T t, Where where) {
-        List<T> list = new ArrayList<>();
-        list.add(t);
-        buildParams("deleteBatch", list, null, t.getClass(), null, null, where, null);
+        buildParams("deleteBatch", null, t, t.getClass(), null, null, where, null);
         logger.info("Function Delete.Params:" + dbInputData);
         return baseDao.deleteBatch(dbInputData);
     }
@@ -92,7 +87,6 @@ public class BaseClientImpl<T> implements BaseClient<T> {
 
     @Override
     public Integer getCount(T t, Where where) {
-        //buildParams(t, null, where, "common");
         buildParams("select", null, t, null, null, null, where, null);
         logger.info("Function GetCount.Params:" + dbInputData);
         return baseDao.getCount(dbInputData);
@@ -225,10 +219,6 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                         if (null == item.getClass().getAnnotation(Table.class)) {
                             throw new RuntimeException("Error Input Object! Error @Table Annotation.");
                         }
-                        //校验每个tID必传
-                        /*if (null == ((BaseEntity) item).getId()) {
-                            throw new RuntimeException("ID IS NULL OR IS EMPTY.");
-                        }*/
                         dbInputDataInfo = new DBInputDataInfo();
                         dbInputDataInfo.setTableName(item.getClass().getAnnotation(Table.class).value());
                         if (null != userId) {
@@ -244,6 +234,10 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                             if (null != field.getAnnotation(Id.class) && null != field.get(item)) {
                                 dbInputDataInfo.setPk(new PK().setKeyId(field.getAnnotation(Id.class).value()).setKeyValue(field.get(item)));
                             }
+                        }
+                        //防止提交参数有误,导致没有有效列的更新而造成全表更新时间和更新人的错误更新
+                        if (CollectionUtils.isEmpty(updateColumns)) {
+                            throw new RuntimeException("List<UpdateColumns> updateColumns IS NULL OR IS EMPTY.");
                         }
                         dbInputDataInfo.setUpdateColumns(updateColumns);
                         dbInputDataInfoList.add(dbInputDataInfo);

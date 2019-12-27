@@ -65,9 +65,9 @@
             update ${dbInputDataInfo.tableName}
             <if test="dbInputDataInfo.updateId != null">
                 SET update_id = #{dbInputDataInfo.updateId},
-                update_time = NOW(),
+                update_time = NOW()
             </if>
-            <foreach collection="dbInputDataInfo.updateColumns" item="item" separator=",">
+            <foreach collection="dbInputDataInfo.updateColumns" open="," item="item" separator=",">
                 ${item.column} = #{item.value}
             </foreach>
             WHERE 1 = 1

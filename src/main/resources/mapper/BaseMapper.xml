@@ -3,8 +3,8 @@
 <mapper namespace="com.lsm.common.dao.BaseDao">
     <insert id="saveBatch" parameterType="com.lsm.common.db.DBInputData">
         INSERT INTO ${tableName} (
-        creater_id,
-        creater_time,
+        create_id,
+        create_time,
         is_delete
         <if test="colums != null and colums.size()>0">
             <foreach collection="colums" item="item" index="index" open="," separator=",">
@@ -16,7 +16,7 @@
             <foreach collection="dbInputDataInfoList" item="dbInputDataInfo" index="index" separator=",">
                 <if test="dbInputDataInfo.values != null and dbInputDataInfo.values.size() > 0">
                     (
-                    #{createrId},
+                    #{createId},
                     NOW(),
                     0
                     <foreach collection="dbInputDataInfo.values" item="item" index="index" open="," separator=","
@@ -29,13 +29,16 @@
     </insert>
     <update id="removeBatch" parameterType="com.lsm.common.db.DBInputData">
         UPDATE ${tableName} SET
-        updater_time = NOW(),
+        update_time = NOW(),
         is_delete = 1
-        <if test="updaterId != null">
-            ,updater_id = #{updaterId}
+        <if test="updateId != null">
+            ,update_id = #{updateId}
         </if>
         WHERE is_delete = 0
-        <if test="pk.keyValues != null and pk.keyValues.size() > 0">
+        <if test="pk != null and pk.keyValue != null">
+            AND ${pk.keyId} = #{pk.keyValue}
+        </if>
+        <if test="pk != null and pk.keyValues != null and pk.keyValues.size() > 0">
             AND ${pk.keyId} IN
             <foreach collection="pk.keyValues" item="item" index="index" open="(" separator="," close=")">
                 #{item}
@@ -46,6 +49,9 @@
     <delete id="deleteBatch" parameterType="com.lsm.common.db.DBInputData">
         DELETE FROM ${tableName}
         WHERE 1 = 1
+        <if test="pk != null and pk.keyValue != null">
+            AND ${pk.keyId} = #{pk.keyValue}
+        </if>
         <if test="pk != null and pk.keyValues != null and pk.keyValues.size() > 0">
             AND ${pk.keyId} IN
             <foreach collection="pk.keyValues" item="item" index="index" open="(" separator="," close=")">
@@ -57,9 +63,9 @@
     <update id="updateBatch" parameterType="java.util.List">
         <foreach collection="dbInputDataInfoList" item="dbInputDataInfo" index="index" separator=";">
             update ${dbInputDataInfo.tableName}
-            <if test="dbInputDataInfo.updaterId != null">
-                SET updater_id = #{dbInputDataInfo.updaterId},
-                updater_time = NOW(),
+            <if test="dbInputDataInfo.updateId != null">
+                SET update_id = #{dbInputDataInfo.updateId},
+                update_time = NOW(),
             </if>
             <foreach collection="dbInputDataInfo.updateColumns" item="item" separator=",">
                 ${item.column} = #{item.value}

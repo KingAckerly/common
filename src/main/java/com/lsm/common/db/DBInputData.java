@@ -9,8 +9,8 @@ public class DBInputData {
     private PK pk;
     private List<String> selectColumns;
     private Where where;
-    private Integer createrId;
-    private Integer updaterId;
+    private Integer createId;
+    private Integer updateId;
     private List<DBInputDataInfo> dbInputDataInfoList;
 
     public String getTableName() {
@@ -58,21 +58,21 @@ public class DBInputData {
         return this;
     }
 
-    public Integer getCreaterId() {
-        return createrId;
+    public Integer getCreateId() {
+        return createId;
     }
 
-    public DBInputData setCreaterId(Integer createrId) {
-        this.createrId = createrId;
+    public DBInputData setCreateId(Integer createId) {
+        this.createId = createId;
         return this;
     }
 
-    public Integer getUpdaterId() {
-        return updaterId;
+    public Integer getUpdateId() {
+        return updateId;
     }
 
-    public DBInputData setUpdaterId(Integer updaterId) {
-        this.updaterId = updaterId;
+    public DBInputData setUpdateId(Integer updateId) {
+        this.updateId = updateId;
         return this;
     }
 
@@ -93,8 +93,8 @@ public class DBInputData {
                 ", pk=" + pk +
                 ", selectColumns=" + selectColumns +
                 ", where=" + where +
-                ", createrId=" + createrId +
-                ", updaterId=" + updaterId +
+                ", createId=" + createId +
+                ", updateId=" + updateId +
                 ", dbInputDataInfoList=" + dbInputDataInfoList +
                 '}';
     }

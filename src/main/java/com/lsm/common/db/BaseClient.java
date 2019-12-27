@@ -2,7 +2,7 @@ package com.lsm.common.db;
 
 
 import com.github.pagehelper.PageInfo;
-import com.lsm.entity.entity.BaseEntity;
+//import com.lsm.entity.BaseEntity;
 
 import java.util.List;
 
@@ -24,9 +24,11 @@ public interface BaseClient<T> {
 
     Integer getCount(T t, Where where);
 
-    BaseEntity get(T t, Where where, List<String> selectColumns);
+    //BaseEntity get(T t, Where where, List<String> selectColumns);
+    T get(T t, Where where, List<String> selectColumns);
 
-    List<BaseEntity> list(T t, Where where, List<String> selectColumns);
+    //List<BaseEntity> list(T t, Where where, List<String> selectColumns);
+    List<T> list(T t, Where where, List<String> selectColumns);
 
     PageInfo listPage(T t, Where where, List<String> selectColumns, Integer pageNum, Integer pageSize);
 }

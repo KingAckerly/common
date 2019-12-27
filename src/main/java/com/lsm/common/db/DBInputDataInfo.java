@@ -8,7 +8,7 @@ public class DBInputDataInfo {
     private List<Object> values;
     private PK pk;
     private List<UpdateColumns> updateColumns;
-    private Integer updaterId;
+    private Integer updateId;
 
     public String getTableName() {
         return tableName;
@@ -46,12 +46,12 @@ public class DBInputDataInfo {
         return this;
     }
 
-    public Integer getUpdaterId() {
-        return updaterId;
+    public Integer getUpdateId() {
+        return updateId;
     }
 
-    public DBInputDataInfo setUpdaterId(Integer updaterId) {
-        this.updaterId = updaterId;
+    public DBInputDataInfo setUpdateId(Integer updateId) {
+        this.updateId = updateId;
         return this;
     }
 
@@ -62,7 +62,7 @@ public class DBInputDataInfo {
                 ", values=" + values +
                 ", pk=" + pk +
                 ", updateColumns=" + updateColumns +
-                ", updaterId=" + updaterId +
+                ", updateId=" + updateId +
                 '}';
     }
 }

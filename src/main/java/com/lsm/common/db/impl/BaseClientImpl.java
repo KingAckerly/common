@@ -1,16 +1,16 @@
 package com.lsm.common.db.impl;
 
-import annotation.Column;
-import annotation.Id;
-import annotation.Table;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lsm.common.annotation.Column;
+import com.lsm.common.annotation.Id;
+import com.lsm.common.annotation.Table;
 import com.lsm.common.dao.BaseDao;
 import com.lsm.common.db.*;
 import com.lsm.common.util.FieldsUtil;
 import com.lsm.common.util.MapUtil;
 import com.lsm.common.util.UnderlineHumpUtil;
-import com.lsm.entity.entity.BaseEntity;
+//import com.lsm.entity.BaseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,14 +48,9 @@ public class BaseClientImpl<T> implements BaseClient<T> {
 
     @Override
     public Integer remove(T t, Where where, Integer userId) {
-        Integer id = ((BaseEntity) t).getId();
-        List<Integer> ids = new ArrayList<>();
-        if (null != id) {
-            ids.add(id);
-        }
         List<T> list = new ArrayList<>();
         list.add(t);
-        buildParams("removeBatch", list, null, t.getClass(), ids, null, where, userId);
+        buildParams("removeBatch", list, null, t.getClass(), null, null, where, userId);
         logger.info("Function Remove.Params:" + dbInputData);
         return baseDao.removeBatch(dbInputData);
     }
@@ -68,14 +63,9 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     }
 
     public Integer delete(T t, Where where) {
-        Integer id = ((BaseEntity) t).getId();
-        List<Integer> ids = new ArrayList<>();
-        if (null != id) {
-            ids.add(id);
-        }
         List<T> list = new ArrayList<>();
         list.add(t);
-        buildParams("deleteBatch", list, null, t.getClass(), ids, null, where, null);
+        buildParams("deleteBatch", list, null, t.getClass(), null, null, where, null);
         logger.info("Function Delete.Params:" + dbInputData);
         return baseDao.deleteBatch(dbInputData);
     }
@@ -109,14 +99,14 @@ public class BaseClientImpl<T> implements BaseClient<T> {
     }
 
     @Override
-    public BaseEntity get(T t, Where where, List<String> selectColumns) {
+    public T get(T t, Where where, List<String> selectColumns) {
         buildParams("select", null, t, null, null, selectColumns, where, null);
         logger.info("Function Get.Params:" + dbInputData);
-        return buildBaseEntity(t, baseDao.get(dbInputData));
+        return (T) buildBaseEntity(t, baseDao.get(dbInputData));
     }
 
     @Override
-    public List<BaseEntity> list(T t, Where where, List<String> selectColumns) {
+    public List<T> list(T t, Where where, List<String> selectColumns) {
         buildParams("select", null, t, null, null, selectColumns, where, null);
         logger.info("Function List.Params:" + dbInputData);
         return buildBaseEntity(t, baseDao.list(dbInputData));
@@ -132,9 +122,9 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         List list = baseDao.list(dbInputData);
         //new PageInfo必须对查出的原始数据进行,如果查出的原始数据有变动过,会导致PageInfo的基本属性如pageNum那些不准确
         //所以这里通过查出的原始数据list来得到PageInfo对象
-        PageInfo<BaseEntity> pageInfo = new PageInfo<BaseEntity>(list);
+        PageInfo<T> pageInfo = new PageInfo<T>(list);
         //接着在这里处理原始数据list,封装成我们最终想要返回的集合
-        List<BaseEntity> baseEntityList = buildBaseEntity(t, list);
+        List<T> baseEntityList = buildBaseEntity(t, list);
         //覆盖掉得到PageInfo对象时里面的list,来得到最终想要返回的PageInfo
         pageInfo.setList(baseEntityList);
         return pageInfo;
@@ -156,7 +146,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                         throw new RuntimeException("Error Input Object! Error @Table Annotation.");
                     }
                     dbInputData = new DBInputData();
-                    dbInputData.setCreaterId(userId);
+                    dbInputData.setCreateId(userId);
                     dbInputData.setTableName(temp.getClass().getAnnotation(Table.class).value());
                     fields = FieldsUtil.getFields(temp.getClass());
                     //要操作的列
@@ -189,10 +179,6 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     if (null == clazz) {
                         throw new RuntimeException("Class<?> clazz IS NULL.");
                     }
-                    //防止既无ID也无WHERE条件,导致全表误删
-                    if (CollectionUtils.isEmpty(ids) && null == where) {
-                        throw new RuntimeException("(List<Integer> ids IS NULL OR IS EMPTY) AND WHERE where IS NULL.");
-                    }
                     dbInputData = new DBInputData();
                     String tableName = getTableName(clazz);
                     if (StringUtils.isEmpty(tableName)) {
@@ -206,15 +192,27 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                         field.setAccessible(true);
                         if (null != field.getAnnotation(Id.class)) {
                             pk.setKeyId(field.getAnnotation(Id.class).value());
+                            //null != t 代表是单个操作复用批量操作的数据结构
+                            if (null != t) {
+                                pk.setKeyValue(field.get(t));
+                            }
                         }
                     }
                     pk.setKeyValues(ids);
+                    //null != t 表示单个操作,如果既没有主键也没有WHERE条件,则抛出,避免全表误删
+                    if (null != t && null == pk.getKeyValue() && null == where) {
+                        throw new RuntimeException("(id IS NULL OR IS EMPTY) AND WHERE where IS NULL.");
+                    }
+                    //null == t 表示批量操作,如果既没有主键集合也没有WHERE条件,则抛出,避免全表误删
+                    if (null == t && CollectionUtils.isEmpty(ids) && null == where) {
+                        throw new RuntimeException("(List<Integer> ids IS NULL OR IS EMPTY) AND WHERE where IS NULL.");
+                    }
                     dbInputData.setPk(pk);
                     if (null != where) {
                         dbInputData.setWhere(where);
                     }
                     if (null != userId) {
-                        dbInputData.setUpdaterId(userId);
+                        dbInputData.setUpdateId(userId);
                     }
                     break;
                 case "updateBatch":
@@ -228,13 +226,13 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                             throw new RuntimeException("Error Input Object! Error @Table Annotation.");
                         }
                         //校验每个tID必传
-                        if (null == ((BaseEntity) item).getId()) {
+                        /*if (null == ((BaseEntity) item).getId()) {
                             throw new RuntimeException("ID IS NULL OR IS EMPTY.");
-                        }
+                        }*/
                         dbInputDataInfo = new DBInputDataInfo();
                         dbInputDataInfo.setTableName(item.getClass().getAnnotation(Table.class).value());
                         if (null != userId) {
-                            dbInputDataInfo.setUpdaterId(userId);
+                            dbInputDataInfo.setUpdateId(userId);
                         }
                         fields = FieldsUtil.getFields(item.getClass());
                         List<UpdateColumns> updateColumns = new ArrayList<>();
@@ -295,7 +293,7 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         return null;
     }
 
-    public BaseEntity buildBaseEntity(T t, HashMap<String, Object> hashMap) {
+    public T buildBaseEntity(T t, HashMap<String, Object> hashMap) {
         if (null == hashMap) {
             return null;
         }
@@ -303,20 +301,20 @@ public class BaseClientImpl<T> implements BaseClient<T> {
         for (Map.Entry<String, Object> item : hashMap.entrySet()) {
             baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
         }
-        return (BaseEntity) MapUtil.mapToEntity(baseMap, t.getClass());
+        return (T) MapUtil.mapToEntity(baseMap, t.getClass());
     }
 
-    public List<BaseEntity> buildBaseEntity(T t, List<HashMap> list) {
+    public List<T> buildBaseEntity(T t, List<HashMap> list) {
         if (CollectionUtils.isEmpty(list)) {
             return null;
         }
-        List<BaseEntity> baseEntityList = new ArrayList<>();
+        List<T> baseEntityList = new ArrayList<>();
         for (HashMap<String, Object> map : list) {
             baseMap = new HashMap<>();
             for (Map.Entry<String, Object> item : map.entrySet()) {
                 baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
             }
-            baseEntityList.add((BaseEntity) MapUtil.mapToEntity(baseMap, t.getClass()));
+            baseEntityList.add((T) MapUtil.mapToEntity(baseMap, t.getClass()));
         }
         return baseEntityList;
     }

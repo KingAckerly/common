@@ -1,6 +1,5 @@
 package com.lsm.common.aop;
 
-import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.lsm.common.annotation.WebLog;
 import org.aspectj.lang.JoinPoint;
@@ -16,10 +15,18 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * 执行顺序
+ * Around>Before>接口中的逻辑代码>After>AfterReturning
+ * Around:环绕,可以在切入点前后织入代码,并且可以自由的控制何时执行切点
+ * Before:在切点之前,织入相关代码
+ * After:在切点之后,织入相关代码
+ * AfterReturning:在切点返回内容后,织入相关代码,一般用于对返回值做些加工处理的场景
+ * AfterThrowing:用来处理当织入的代码抛出异常后的逻辑处理
+ */
 @Aspect
 @Component
 public class WebLogAspect {
@@ -37,6 +44,24 @@ public class WebLogAspect {
      */
     @Pointcut("@annotation(com.lsm.common.annotation.WebLog)")
     public void webLog() {
+    }
+
+    /**
+     * 环绕
+     *
+     * @param proceedingJoinPoint
+     * @return
+     * @throws Throwable
+     */
+    @Around("webLog()")
+    public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        long startTime = System.currentTimeMillis();
+        Object result = proceedingJoinPoint.proceed();
+        // 打印出参
+        logger.info("Response Args  : {}", new Gson().toJson(result));
+        // 执行耗时
+        logger.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
+        return result;
     }
 
     /**
@@ -92,24 +117,6 @@ public class WebLogAspect {
     public void doAfter() throws Throwable {
         // 接口结束后换行，方便分割查看
         logger.info("=========================================== End ===========================================" + LINE_SEPARATOR);
-    }
-
-    /**
-     * 环绕
-     *
-     * @param proceedingJoinPoint
-     * @return
-     * @throws Throwable
-     */
-    @Around("webLog()")
-    public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        long startTime = System.currentTimeMillis();
-        Object result = proceedingJoinPoint.proceed();
-        // 打印出参
-        logger.info("Response Args  : {}", new Gson().toJson(result));
-        // 执行耗时
-        logger.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
-        return result;
     }
 
     /**

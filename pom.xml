@@ -42,5 +42,15 @@
             <!--Springboot2.0以上需要使用1.2.10版本,否则可能启动报错r-->
             <version>1.2.10</version>
         </dependency>
+        <!--aop依赖-->
+        <!--<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>-->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.9.1</version>
+        </dependency>
     </dependencies>
 </project>

@@ -16,6 +16,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -32,6 +33,8 @@ import java.util.*;
 public class WebLogAspect {
 
     private static Logger logger = LoggerFactory.getLogger(WebLogAspect.class);
+
+    private static StringBuffer sb;
 
     /**
      * 换行符
@@ -59,8 +62,10 @@ public class WebLogAspect {
         Object result = proceedingJoinPoint.proceed();
         // 打印出参
         logger.info("Response Args  : {}", new Gson().toJson(result));
+        sb.append("Response Args  : " + new Gson().toJson(result) + LINE_SEPARATOR);
         // 执行耗时
         logger.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
+        sb.append("Time-Consuming : " + (System.currentTimeMillis() - startTime) + " ms" + LINE_SEPARATOR);
         return result;
     }
 
@@ -84,18 +89,31 @@ public class WebLogAspect {
         String type = webLog.type().getType();
         // 打印请求相关参数
         logger.info("========================================== Start ==========================================");
+        sb = new StringBuffer();
+        sb.append("========================================== Start ==========================================" + LINE_SEPARATOR);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String now = df.format(new Date());
+        logger.info("开始时间:" + now);
+        sb.append("开始时间:" + now + LINE_SEPARATOR);
         // 打印请求 url
         logger.info("URL            : {}", request.getRequestURL().toString());
+        sb.append("URL            : " + request.getRequestURL().toString() + LINE_SEPARATOR);
         // 打印描述信息
         logger.info("description    : {}", description);
+        sb.append("description    : " + description + LINE_SEPARATOR);
         logger.info("level          : {}", level);
+        sb.append("level          : " + level + LINE_SEPARATOR);
         logger.info("type           : {}", type);
+        sb.append("type           : " + type + LINE_SEPARATOR);
         // 打印 Http method
         logger.info("HTTP Method    : {}", request.getMethod());
+        sb.append("HTTP Method    : " + request.getMethod() + LINE_SEPARATOR);
         // 打印调用 controller 的全路径以及执行方法
         logger.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
+        sb.append("Class Method   : " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName() + LINE_SEPARATOR);
         // 打印请求的 IP
         logger.info("IP             : {}", request.getRemoteAddr());
+        sb.append("IP             : " + request.getRemoteAddr() + LINE_SEPARATOR);
         // 打印请求入参
         Object[] args = joinPoint.getArgs();
         ParameterNameDiscoverer pnd = new DefaultParameterNameDiscoverer();
@@ -106,6 +124,7 @@ public class WebLogAspect {
             paramMap.put(parameterNames[i], gson.toJson(args[i]));
         }
         logger.info("Request Args   : {}", paramMap);
+        sb.append("Request Args   : " + paramMap + LINE_SEPARATOR);
     }
 
     /**
@@ -116,7 +135,8 @@ public class WebLogAspect {
     @After("webLog()")
     public void doAfter() throws Throwable {
         // 接口结束后换行，方便分割查看
-        logger.info("=========================================== End ===========================================" + LINE_SEPARATOR);
+        //logger.info("=========================================== End ===========================================" + LINE_SEPARATOR);
+        //sb.append("=========================================== End ===========================================" + LINE_SEPARATOR);
     }
 
     /**
@@ -127,6 +147,14 @@ public class WebLogAspect {
     @AfterReturning(returning = "result", pointcut = "webLog()")
     public void doAfterReturning(Object result) {
         logger.info("方法的返回值             : {}", result);
+        sb.append("方法的返回值             : " + result + LINE_SEPARATOR);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String now = df.format(new Date());
+        logger.info("结束时间:" + now);
+        sb.append("结束时间:" + now + LINE_SEPARATOR);
+        logger.info("=========================================== End ===========================================");
+        sb.append("=========================================== End ===========================================");
+        logger.info(sb.toString());
     }
 
     /**

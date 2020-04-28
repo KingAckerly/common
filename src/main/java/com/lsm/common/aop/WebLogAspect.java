@@ -8,8 +8,10 @@ import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -34,12 +36,18 @@ public class WebLogAspect {
 
     private static Logger logger = LoggerFactory.getLogger(WebLogAspect.class);
 
-    private static StringBuffer sb;
-
     /**
      * 换行符
      */
     private static final String LINE_SEPARATOR = System.lineSeparator();
+
+    /**
+     * 组装请求日志文本,推送kafka
+     */
+    private static StringBuffer sb;
+
+    @Autowired
+    private KafkaTemplate kafkaTemplate;
 
     /**
      * 定义一个切点
@@ -155,6 +163,9 @@ public class WebLogAspect {
         logger.info("=========================================== End ===========================================");
         sb.append("=========================================== End ===========================================");
         logger.info(sb.toString());
+
+        //推送kafka
+        kafkaTemplate.send("test", sb);
     }
 
     /**

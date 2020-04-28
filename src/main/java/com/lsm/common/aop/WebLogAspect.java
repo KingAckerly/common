@@ -164,8 +164,7 @@ public class WebLogAspect {
         sb.append("=========================================== End ===========================================");
         logger.info(sb.toString());
         //推送kafka
-        kafkaTemplate.send("test", sb.toString());
-        logger.info("已推送");
+        kafkaTemplate.send("aop", sb.toString());
     }
 
     /**

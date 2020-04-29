@@ -1,7 +1,9 @@
 package com.lsm.common.aop;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.lsm.common.annotation.WebLog;
+import com.lsm.common.bean.RequestLog;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 
 /**
  * 执行顺序
@@ -42,9 +45,9 @@ public class WebLogAspect {
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
     /**
-     * 组装请求日志文本,推送kafka
+     * 组装请求日志对象,推送kafka
      */
-    private static StringBuffer sb;
+    private static RequestLog requestLog;
 
     @Autowired
     private KafkaTemplate kafkaTemplate;
@@ -70,10 +73,10 @@ public class WebLogAspect {
         Object result = proceedingJoinPoint.proceed();
         // 打印出参
         logger.info("Response Args  : {}", new Gson().toJson(result));
-        sb.append("Response Args  : " + new Gson().toJson(result) + LINE_SEPARATOR);
+        requestLog.setResponseArgs(new Gson().toJson(result));
         // 执行耗时
         logger.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
-        sb.append("Time-Consuming : " + (System.currentTimeMillis() - startTime) + " ms" + LINE_SEPARATOR);
+        requestLog.setTimeConsuming((System.currentTimeMillis() - startTime) + " ms");
         return result;
     }
 
@@ -97,31 +100,30 @@ public class WebLogAspect {
         String type = webLog.type().getType();
         // 打印请求相关参数
         logger.info("========================================== Start ==========================================");
-        sb = new StringBuffer();
-        sb.append("========================================== Start ==========================================" + LINE_SEPARATOR);
+        requestLog = new RequestLog();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String now = df.format(new Date());
         logger.info("开始时间:" + now);
-        sb.append("开始时间:" + now + LINE_SEPARATOR);
+        requestLog.setStartTime(now);
         // 打印请求 url
         logger.info("URL            : {}", request.getRequestURL().toString());
-        sb.append("URL            : " + request.getRequestURL().toString() + LINE_SEPARATOR);
+        requestLog.setUrl(request.getRequestURL().toString());
         // 打印描述信息
         logger.info("description    : {}", description);
-        sb.append("description    : " + description + LINE_SEPARATOR);
+        requestLog.setDescription(description);
         logger.info("level          : {}", level);
-        sb.append("level          : " + level + LINE_SEPARATOR);
+        requestLog.setLevel(level);
         logger.info("type           : {}", type);
-        sb.append("type           : " + type + LINE_SEPARATOR);
+        requestLog.setType(type);
         // 打印 Http method
         logger.info("HTTP Method    : {}", request.getMethod());
-        sb.append("HTTP Method    : " + request.getMethod() + LINE_SEPARATOR);
+        requestLog.setHttpMethod(request.getMethod());
         // 打印调用 controller 的全路径以及执行方法
         logger.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
-        sb.append("Class Method   : " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName() + LINE_SEPARATOR);
+        requestLog.setClassMethod(joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
         // 打印请求的 IP
         logger.info("IP             : {}", request.getRemoteAddr());
-        sb.append("IP             : " + request.getRemoteAddr() + LINE_SEPARATOR);
+        requestLog.setIp(request.getRemoteAddr());
         // 打印请求入参
         Object[] args = joinPoint.getArgs();
         ParameterNameDiscoverer pnd = new DefaultParameterNameDiscoverer();
@@ -132,7 +134,7 @@ public class WebLogAspect {
             paramMap.put(parameterNames[i], gson.toJson(args[i]));
         }
         logger.info("Request Args   : {}", paramMap);
-        sb.append("Request Args   : " + paramMap + LINE_SEPARATOR);
+        requestLog.setRequestArgs(paramMap);
     }
 
     /**
@@ -144,7 +146,6 @@ public class WebLogAspect {
     public void doAfter() throws Throwable {
         // 接口结束后换行，方便分割查看
         //logger.info("=========================================== End ===========================================" + LINE_SEPARATOR);
-        //sb.append("=========================================== End ===========================================" + LINE_SEPARATOR);
     }
 
     /**
@@ -155,17 +156,17 @@ public class WebLogAspect {
     @AfterReturning(returning = "result", pointcut = "webLog()")
     public void doAfterReturning(Object result) {
         logger.info("方法的返回值             : {}", result);
-        sb.append("方法的返回值             : " + result + LINE_SEPARATOR);
+        requestLog.setResponseResult(result);
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String now = df.format(new Date());
         logger.info("结束时间:" + now);
-        sb.append("结束时间:" + now + LINE_SEPARATOR);
+        requestLog.setEntTime(now);
         logger.info("=========================================== End ===========================================");
-        sb.append("=========================================== End ===========================================");
-        logger.info(sb.toString());
         //推送kafka
-        kafkaTemplate.send("aop", sb.toString());
+        String message = JSON.toJSONString(requestLog);
+        kafkaTemplate.send("requestLog", message);
     }
+
 
     /**
      * 后置异常通知

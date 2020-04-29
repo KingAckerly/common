@@ -163,6 +163,7 @@ public class WebLogAspect {
         requestLog.setEntTime(now);
         logger.info("=========================================== End ===========================================");
         //推送kafka
+        //因为KafkaTemplate.send只支持String类型的消息,所以将自定义bean转成json字符串传输,当消息被消费者消费时,消费者再将json字符串重新转回自定义bean
         String message = JSON.toJSONString(requestLog);
         kafkaTemplate.send("requestLog", message);
     }

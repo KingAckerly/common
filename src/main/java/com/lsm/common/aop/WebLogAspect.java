@@ -165,7 +165,8 @@ public class WebLogAspect {
         //推送kafka
         //因为KafkaTemplate.send只支持String类型的消息,所以将自定义bean转成json字符串传输,当消息被消费者消费时,消费者再将json字符串重新转回自定义bean
         String message = JSON.toJSONString(requestLog);
-        kafkaTemplate.send("requestLog", message);
+        //未使用Kafka时请注释下面的推送
+        //kafkaTemplate.send("requestLog", message);
     }
 
 

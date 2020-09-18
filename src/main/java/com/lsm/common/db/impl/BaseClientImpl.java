@@ -145,12 +145,18 @@ public class BaseClientImpl<T> implements BaseClient<T> {
                     fields = FieldsUtil.getFields(temp.getClass());
                     //要操作的列
                     colums = new ArrayList<>();
-                    for (Field field : fields) {
+                    fields.forEach(field -> {
                         field.setAccessible(true);
                         if (null != field.getAnnotation(Column.class)) {
                             colums.add(field.getAnnotation(Column.class).value());
                         }
-                    }
+                    });
+//                    for (Field field : fields) {
+//                        field.setAccessible(true);
+//                        if (null != field.getAnnotation(Column.class)) {
+//                            colums.add(field.getAnnotation(Column.class).value());
+//                        }
+//                    }
                     dbInputData.setColums(colums);
                     //遍历
                     dbInputDataInfoList = new ArrayList<>();
@@ -292,9 +298,10 @@ public class BaseClientImpl<T> implements BaseClient<T> {
             return null;
         }
         baseMap = new HashMap<>();
-        for (Map.Entry<String, Object> item : hashMap.entrySet()) {
-            baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
-        }
+        hashMap.forEach((k, v) -> baseMap.put(UnderlineHumpUtil.lineToHump(k), v));
+//        for (Map.Entry<String, Object> item : hashMap.entrySet()) {
+//            baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
+//        }
         return (T) MapUtil.mapToEntity(baseMap, t.getClass());
     }
 
@@ -303,13 +310,20 @@ public class BaseClientImpl<T> implements BaseClient<T> {
             return null;
         }
         List<T> baseEntityList = new ArrayList<>();
-        for (HashMap<String, Object> map : list) {
+        list.forEach(map -> {
             baseMap = new HashMap<>();
-            for (Map.Entry<String, Object> item : map.entrySet()) {
-                baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
-            }
+            map.forEach((k, v) -> {
+                baseMap.put(UnderlineHumpUtil.lineToHump((String) k), v);
+            });
             baseEntityList.add((T) MapUtil.mapToEntity(baseMap, t.getClass()));
-        }
+        });
+//        for (HashMap<String, Object> map : list) {
+//            baseMap = new HashMap<>();
+//            for (Map.Entry<String, Object> item : map.entrySet()) {
+//                baseMap.put(UnderlineHumpUtil.lineToHump(item.getKey()), item.getValue());
+//            }
+//            baseEntityList.add((T) MapUtil.mapToEntity(baseMap, t.getClass()));
+//        }
         return baseEntityList;
     }
 }

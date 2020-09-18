@@ -21,6 +21,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -69,14 +73,15 @@ public class WebLogAspect {
      */
     @Around("webLog()")
     public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        long startTime = System.currentTimeMillis();
+        Instant start = Instant.now();
         Object result = proceedingJoinPoint.proceed();
         // 打印出参
         logger.info("Response Args  : {}", new Gson().toJson(result));
         requestLog.setResponseArgs(new Gson().toJson(result));
         // 执行耗时
-        logger.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
-        requestLog.setTimeConsuming((System.currentTimeMillis() - startTime) + " ms");
+        long finish = Duration.between(start, Instant.now()).toMillis();
+        logger.info("Time-Consuming : {} ms", finish);
+        requestLog.setTimeConsuming(finish + " ms");
         return result;
     }
 
@@ -157,8 +162,8 @@ public class WebLogAspect {
     public void doAfterReturning(Object result) {
         logger.info("方法的返回值             : {}", result);
         requestLog.setResponseResult(result);
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String now = df.format(new Date());
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String now = df.format(LocalDateTime.now());
         logger.info("结束时间:" + now);
         requestLog.setEntTime(now);
         logger.info("=========================================== End ===========================================");

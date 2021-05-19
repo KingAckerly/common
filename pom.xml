@@ -73,5 +73,10 @@
             <artifactId>spring-kafka</artifactId>
             <version>2.2.7.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>com.vincentbrison.openlibraries.android</groupId>
+            <artifactId>dualcache-jsonserializer</artifactId>
+            <version>3.1.1</version>
+        </dependency>
     </dependencies>
 </project>

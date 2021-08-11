@@ -35,7 +35,17 @@ public class ReturnResponse {
      * @return
      */
     public static <T> Result<T> failParame(String msg) {
-        return new Result().setCode("9999").setMsg(msg).setSuccess(false).setTimeStamp(System.currentTimeMillis()).setData(null);
+        return new Result().setCode("8888").setMsg(msg).setSuccess(false).setTimeStamp(System.currentTimeMillis()).setData(null);
     }
 
+    /**
+     * 异常,指定msg返回,无data
+     *
+     * @param msg
+     * @param <T>
+     * @return
+     */
+    public static <T> Result<T> assembleRespError(String msg) {
+        return new Result<T>().setCode("9999").setMsg(msg).setTimeStamp(System.currentTimeMillis()).setData(null);
+    }
 }
